@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "sourceMap": true,
+    "outDir": "dist",
+    "strict": true,
+    "lib": [
+      "esnext"
+    ],
+    "esModuleInterop": true
+  }
+}
+//module: Spécifie la méthode de génération du code du module. Node utilise commonjs.
+
+
+
+
+
+//outDir : Il s’agit de l’emplacement où les fichiers .js sont produits après la transpilation.  Dans ce tutoriel, vous le sauvegarderez sous dist.

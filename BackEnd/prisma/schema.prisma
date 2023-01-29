@@ -1,0 +1,3721 @@
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["createMany"]
+}
+
+datasource db {
+  provider = "sqlserver"
+  url      = env("DATABASE_URL")
+}
+
+model Accident {
+  Ref                  BigInt
+  CodeFiliale          BigInt
+  DateC                DateTime? @db.DateTime
+  DateAcc              DateTime? @db.DateTime
+  HeureAcc             String?   @db.VarChar(50)
+  NumDosPolice         String?   @db.VarChar(50)
+  CondMeteo            String?   @db.VarChar(50)
+  CondRoute            String?   @db.VarChar(50)
+  Immatriculation      String?   @db.VarChar(20)
+  Matriculec           String?   @db.VarChar(20)
+  Vitesse              Decimal?  @db.Decimal(18, 3)
+  Assurance            BigInt?
+  Fautif               Boolean?
+  ImmatriculationTiers String?   @db.VarChar(20)
+  Conducteur           String?   @db.VarChar(50)
+  VitesseTiers         Decimal?  @db.Decimal(18, 3)
+  AssuranceTiers       String?   @db.VarChar(50)
+  DateExpAv            DateTime? @db.DateTime
+  DateExpApr           DateTime? @db.DateTime
+  AccordRep            Boolean?
+  DateRemb             DateTime? @db.DateTime
+  NumCheque            String?   @db.VarChar(100)
+  Montant              Decimal?  @db.Decimal(18, 3)
+  MontD_gats           Decimal?  @map("MontDégats") @db.Decimal(18, 3)
+  DateFin              DateTime? @db.DateTime
+  HeureFin             String?   @db.VarChar(50)
+  AccordPC             Boolean?
+  AccordBS             Boolean?
+  Lieu                 String?   @db.VarChar(50)
+  Descriptions         String?   @db.VarChar(500)
+  Degats               String?   @db.VarChar(50)
+  NomExpert            String?   @db.VarChar(50)
+  ExpertiseOui         Boolean?
+  ExpertiseNon         Boolean?
+  RP                   Boolean?
+  NonFautif            Boolean?
+  TypeAccident         String?   @db.VarChar(50)
+  Commentaires         String?   @db.VarChar(500)
+  Mission              BigInt?
+  DateEnvoiFacture     DateTime? @db.DateTime
+  DateMC               DateTime? @db.DateTime
+  HeureMC              String?   @db.VarChar(50)
+
+  @@id([Ref, CodeFiliale], map: "PK_Accident")
+}
+
+model AffectationClient {
+  CodeLieu    BigInt  @id(map: "PK_AffectationClient") @default(autoincrement())
+  Affectation String? @db.VarChar(100)
+}
+
+model AffectationType {
+  Code            BigInt  @id(map: "PK_AffectationType") @default(autoincrement())
+  TypeAffectation String? @db.VarChar(50)
+}
+
+model Alerte {
+  CodeAlert        BigInt        @id(map: "PK_Alerte") @default(autoincrement())
+  DesigAlerte      String        @db.VarChar(50)
+  CodeTyVeh        BigInt?
+  RefArtic         String?       @db.VarChar(50)
+  Index_Prev       BigInt?
+  Echeance         BigInt?
+  index_message    BigInt?
+  echeance_message BigInt?
+  Etat             Boolean?
+  Acceuil          Boolean?
+  Client           BigInt?
+  Barre            Boolean?
+  TypeVehicule     TypeVehicule? @relation(fields: [CodeTyVeh], references: [CodeTyVeh], onDelete: NoAction, onUpdate: NoAction, map: "FK_Alerte_TypeVehicule")
+  Article          Article?      @relation(fields: [RefArtic], references: [RefArtic], onDelete: NoAction, onUpdate: NoAction, map: "FK_Alerte_Article")
+
+  @@index([CodeTyVeh], map: "index_CodeTyVeh")
+  @@index([RefArtic], map: "index_RefArtic")
+}
+
+model AlerteRemorque {
+  CodeAlert        BigInt   @id(map: "PK_AlerteRemorque") @default(autoincrement())
+  DesigAlerte      String   @db.VarChar(50)
+  CodeTypeRemorque BigInt
+  RefArtic         String?  @db.VarChar(50)
+  Index_Prev       BigInt?
+  Echeance         BigInt?
+  index_message    BigInt?
+  echeance_message BigInt?
+  Etat             Boolean?
+  Acceuil          Boolean?
+  Client           BigInt?
+
+  @@index([CodeTypeRemorque], map: "index_CodeTypeRemorque")
+  @@index([RefArtic], map: "index_RefArticle")
+}
+
+model Article {
+  RefArtic             String                 @id(map: "PK_Article") @db.VarChar(50)
+  DesignationArt       String?                @db.VarChar(50)
+  CodeCatArt           BigInt?
+  CodePays             String?                @db.VarChar(5)
+  ActifsArt            Boolean?
+  StockMinArt          Float?                 @db.Real
+  StockInitArt         Float?                 @default(0, map: "DF_Article_StockInitArt") @db.Real
+  QteEnStock           Float?                 @db.Real
+  Prix_htArt           Float?                 @db.Real
+  TVAArt               Float?                 @db.Real
+  DocumentArt          String?                @db.VarChar(500)
+  ObservationsArt      String?                @db.VarChar(500)
+  Serial               Boolean?
+  PhotoArt             String?                @db.VarChar(50)
+  PhotoCam             Bytes?                 @db.Image
+  CodeOrgane           BigInt?
+  codeCategRep         BigInt?
+  KilometrageTheori    BigInt?
+  StockMaxiArt         Float?                 @db.Real
+  CategorieArticle     CategorieArticle?      @relation(fields: [CodeCatArt], references: [CodeCatArt], onDelete: NoAction, onUpdate: NoAction, map: "FK_Article_CategorieArticle")
+  Alerte               Alerte[]
+  ArticleTypeVehicule  ArticleTypeVehicule[]
+  Extincteurs          Extincteurs[]
+  Flexibles            Flexibles[]
+  LigneOrdreReparation LigneOrdreReparation[]
+  LigneOrdreSortie     LigneOrdreSortie[]
+  LocationArticle      LocationArticle[]
+  Param_Pneu           Param_Pneu?
+  RemplacerArticle     RemplacerArticle[]
+  Tachygraphe          Tachygraphe[]
+
+  @@index([CodeCatArt], map: "index_CodeCatArt")
+  @@index([CodePays], map: "index_CodePays")
+}
+
+model ArticleFournisseur {
+  AR_Ref         String   @db.VarChar(19)
+  CT_Num         String   @db.VarChar(17)
+  AF_RefFourniss String   @db.VarChar(19)
+  AF_PrixAch     Decimal? @db.Decimal(24, 6)
+  AF_Remise      Decimal? @db.Decimal(24, 6)
+  IntituleFRS    String?  @db.VarChar(55)
+  TVA            Float?
+
+  @@id([AR_Ref, CT_Num, AF_RefFourniss], map: "PK_ArticleFournisseur")
+}
+
+model ArticleTypeVehicule {
+  RefArtic     String       @db.VarChar(50)
+  CodeTyVeh    BigInt
+  TypeVehicule TypeVehicule @relation(fields: [CodeTyVeh], references: [CodeTyVeh], onUpdate: NoAction, map: "FK_ArticleTypeVehicule_TypeVehicule")
+  Article      Article      @relation(fields: [RefArtic], references: [RefArtic], onUpdate: NoAction, map: "FK_ArticleTypeVehicule_Article")
+
+  @@id([RefArtic, CodeTyVeh], map: "PK_ArticleTypeVehicule")
+}
+
+model Assurance {
+  CodeAssur        Int     @id(map: "PK_Assurance") @default(autoincrement())
+  D_signationAssur String? @map("DésignationAssur") @db.VarChar(50)
+}
+
+model Assurance_Contrat {
+  NContrat         String    @db.VarChar(50)
+  Assurance        Int
+  DateEffetDebut   DateTime  @db.SmallDateTime
+  DateEffetFin     DateTime  @db.SmallDateTime
+  DateSignature    DateTime? @db.SmallDateTime
+  R_f_rence        String?   @map("Référence") @db.VarChar(100)
+  Alerte           BigInt?
+  Montant          Decimal?  @db.Decimal(18, 3)
+  PersonneMorale   String?   @db.VarChar(50)
+  PersonnePhysique String?   @db.VarChar(50)
+  Glossaire        String?   @db.VarChar(8000)
+  Fractionnement   String?   @db.VarChar(50)
+  Etat             Boolean?
+  Prolongation     BigInt?
+  Code             BigInt    @id(map: "PK_Assurance_Contrat") @default(autoincrement())
+  Filiale          BigInt?
+  Departement      BigInt?
+}
+
+model Assurance_Option {
+  NContrat        String  @db.VarChar(50)
+  CodeOption      Int
+  CodeAssurance   Int
+  DesignOption    String? @db.VarChar(50)
+  DesignAssurance String? @db.VarChar(50)
+
+  @@id([NContrat, CodeOption], map: "PK_Assurance_Optionmmm")
+}
+
+model Assurance_Vehicule {
+  Vehicule      String    @db.VarChar(50)
+  NContrat      String    @db.VarChar(50)
+  Assurance     Int
+  MontantD_tail Float?    @map("MontantDétail")
+  DateD         DateTime? @db.DateTime
+
+  @@id([Vehicule, NContrat, Assurance], map: "PK_Assurance_Vehicule")
+}
+
+model CategorieArticle {
+  CodeCatArt   BigInt    @id(map: "PK_CategorieArticle")
+  DesignCatArt String?   @db.VarChar(30)
+  Article      Article[]
+}
+
+model CategorieReparation {
+  codeCategRep  BigInt @id(map: "PK_CategorieReparation") @default(autoincrement())
+  DesigCategRep String @db.VarChar(50)
+}
+
+model CategoriesPermis {
+  CodeCategorie         BigInt                  @id(map: "PK_TypesCat")
+  DesignationC          String?                 @db.VarChar(30)
+  Chauffeur_CategPermis Chauffeur_CategPermis[]
+  Convoyeur_CategPermis Convoyeur_CategPermis[]
+  Pompiste_CategPermis  Pompiste_CategPermis[]
+}
+
+model cbSysLibre {
+  CB_File    String  @db.NVarChar(128)
+  CB_Name    String  @db.NVarChar(128)
+  CB_Pos     Int     @db.SmallInt
+  CB_Type    Int     @db.SmallInt
+  CB_Len     Int     @db.SmallInt
+  CB_Flag    Int?    @default(0, map: "DF__cbSysLibr__CB_Fl__0EF901FB") @db.SmallInt
+  CB_Formule String? @db.VarChar(1024)
+  CB_Creator String? @db.Char(4)
+
+  @@id([CB_File, CB_Name], map: "PK_CBSYSLIBRE")
+}
+
+model Chauffeur {
+  MatriculeC               String                     @id(map: "PK_Chauffeur") @db.VarChar(20)
+  PrenomC                  String?                    @db.VarChar(20)
+  NomC                     String?                    @db.VarChar(20)
+  DateEmbaucheC            DateTime?                  @db.DateTime
+  NCinC                    String?                    @db.VarChar(50)
+  DateNaissanceC           DateTime?                  @db.DateTime
+  TelephC                  String?                    @db.VarChar(50)
+  PortableC                String?                    @db.VarChar(50)
+  EmailC                   String?                    @db.VarChar(50)
+  AdresseC                 String?                    @db.VarChar(50)
+  VilleC                   String?                    @db.VarChar(50)
+  CpC                      BigInt?
+  NiveauC                  String?                    @db.VarChar(50)
+  ObsevationsC             String?                    @db.VarChar(500)
+  EtatC                    Boolean?
+  Photo                    String?                    @db.VarChar(100)
+  Permis                   String?                    @db.VarChar(20)
+  PhotoCam                 Bytes?                     @db.Image
+  Commercial               Boolean?
+  DateDelivrance           DateTime?                  @db.DateTime
+  Abreviation              String?                    @db.NVarChar(50)
+  ARChauff                 String?                    @db.NVarChar(50)
+  CodeClient               BigInt?
+  GSang                    String?                    @db.VarChar(50)
+  Chauffeur_CategPermis    Chauffeur_CategPermis[]
+  HistoriqueAnomalieGazoil HistoriqueAnomalieGazoil[]
+  OrdreReparation          OrdreReparation[]
+}
+
+model Chauffeur_CategPermis {
+  MatriculeC       String           @db.VarChar(20)
+  CodeCategorie    BigInt
+  DateP            DateTime?        @db.SmallDateTime
+  CategoriesPermis CategoriesPermis @relation(fields: [CodeCategorie], references: [CodeCategorie], onUpdate: NoAction, map: "FK_Chauffeur_CategPermis_CategoriesPermis")
+  Chauffeur        Chauffeur        @relation(fields: [MatriculeC], references: [MatriculeC], onUpdate: NoAction, map: "FK_Chauffeur_CategPermis_Chauffeur")
+
+  @@id([MatriculeC, CodeCategorie], map: "PK_Chauffeur_CategPermis")
+}
+
+model Chauffeur_Lieu {
+  CodeLieu   BigInt
+  MatriculeC String    @db.VarChar(20)
+  DateDebut  DateTime  @db.SmallDateTime
+  DateFin    DateTime? @db.SmallDateTime
+  Code       BigInt    @id(map: "PK_Chauffeur_Lieu") @default(autoincrement())
+}
+
+model Client {
+  CodeCl           BigInt             @id(map: "PK_Client")
+  IntituleClient   String?            @db.NVarChar(50)
+  ActiviteCl       String?            @db.VarChar(50)
+  AdresseCl        String?            @db.NVarChar(50)
+  VilleCl          String?            @db.NVarChar(50)
+  CpCl             BigInt?
+  RegionCl         String?            @db.NVarChar(50)
+  CodePays         String?            @db.VarChar(5)
+  TelephCl         String?            @db.VarChar(15)
+  Portable         String?            @db.VarChar(15)
+  EmailCl          String?            @db.VarChar(30)
+  SiteCl           String?            @db.VarChar(30)
+  Observations     String?            @db.VarChar(300)
+  RefDep           BigInt?
+  EtatCli          Boolean?
+  Type             String?            @db.VarChar(50)
+  MatriculeFiscale String?            @db.VarChar(50)
+  Principal        Boolean?
+  CodeCatCompta    BigInt?
+  InfoLibre1       Decimal?           @db.Decimal(18, 0)
+  InfoLibre2       Decimal?           @db.Decimal(18, 0)
+  InfoLibre3       Decimal?           @db.Decimal(18, 0)
+  InfoLibre4       Decimal?           @db.Decimal(18, 0)
+  InfoLibre5       Decimal?           @db.Decimal(18, 0)
+  InfoLibre6       Decimal?           @db.Decimal(18, 0)
+  InfoLibre7       Decimal?           @db.Decimal(18, 0)
+  InfoLibre8       Decimal?           @db.Decimal(18, 0)
+  InfoLibre9       Decimal?           @db.Decimal(18, 0)
+  InfoLibre10      Decimal?           @db.Decimal(18, 0)
+  AR_Intitule      String?            @db.NVarChar(50)
+  AR_Description   String?            @db.NVarChar(50)
+  AR_Region        String?            @db.NVarChar(50)
+  AR_Code          String?            @db.NVarChar(50)
+  TypeParametre    BigInt?
+  Formule          String?            @db.VarChar(50)
+  Produit          String?            @db.VarChar(50)
+  Jde              Jde[]
+  Mission          Mission[]
+  OrdreAchatGasoil OrdreAchatGasoil[]
+  OrdreEntrer      OrdreEntrer[]
+  OrdreReparation  OrdreReparation[]
+  OrdreSortie      OrdreSortie[]
+  Transfert        Transfert[]
+  Vehicule         Vehicule[]
+}
+
+model Convoyeur {
+  MatriculeC            String                  @id(map: "PK_Convoyeur") @db.VarChar(20)
+  PrenomC               String?                 @db.VarChar(20)
+  NomC                  String?                 @db.VarChar(20)
+  DateEmbaucheC         DateTime?               @db.DateTime
+  NCinC                 BigInt?
+  DateNaissanceC        DateTime?               @db.DateTime
+  TelephC               String?                 @db.VarChar(50)
+  PortableC             String?                 @db.VarChar(50)
+  EmailC                String?                 @db.VarChar(50)
+  AdresseC              String?                 @db.VarChar(50)
+  VilleC                String?                 @db.VarChar(50)
+  CpC                   BigInt?
+  NiveauC               String?                 @db.VarChar(50)
+  ObsevationsC          String?                 @db.VarChar(500)
+  EtatC                 Boolean?
+  Photo                 String?                 @db.VarChar(100)
+  Permis                String?                 @db.VarChar(20)
+  PhotoCam              Bytes?                  @db.Image
+  Commercial            Boolean?
+  Convoyeur_CategPermis Convoyeur_CategPermis[]
+}
+
+model Convoyeur_CategPermis {
+  MatriculeC       String           @db.VarChar(20)
+  CodeCategorie    BigInt
+  DateP            DateTime?        @db.SmallDateTime
+  CategoriesPermis CategoriesPermis @relation(fields: [CodeCategorie], references: [CodeCategorie], onUpdate: NoAction, map: "FK_Convoyeur_CategPermis_CategoriesPermis")
+  Convoyeur        Convoyeur        @relation(fields: [MatriculeC], references: [MatriculeC], onUpdate: NoAction, map: "FK_Convoyeur_CategPermis_Convoyeur")
+
+  @@id([MatriculeC, CodeCategorie], map: "PK_Convoyeur_CategPermis")
+}
+
+model CoutMainOeuvre {
+  CodeCoutMainOeuvre BigInt    @id(map: "PK_CoutMainOeuvre") @default(autoincrement())
+  DateCout           DateTime? @db.SmallDateTime
+  CoutMainOeuvre     Float?    @db.Real
+}
+
+model CoutMission {
+  CodeCout    BigInt   @id(map: "PK_CoutMission") @default(autoincrement())
+  identifiant String?  @db.VarChar(50)
+  prix        Float?
+  codeMission BigInt?
+  Mission     Mission? @relation(fields: [codeMission], references: [CodeMiss], onDelete: Cascade, map: "FK_CoutMission_Mission")
+}
+
+model CoutOperation {
+  CodeMission BigInt
+  CodeContrat String   @db.VarChar(50)
+  CodeCharge  String   @db.VarChar(50)
+  Montant     Decimal? @db.Decimal(18, 3)
+
+  @@id([CodeMission, CodeContrat, CodeCharge], map: "PK_CoutOperation_1")
+}
+
+model cRegion {
+  CodeReg     String    @id(map: "PK_cRegion") @db.VarChar(50)
+  Designation String?   @db.VarChar(50)
+  cVilles     cVilles[]
+}
+
+model cVilles {
+  CodeVille   String   @id(map: "PK_Villes") @db.VarChar(50)
+  Desig_Ville String?  @db.VarChar(50)
+  CodeReg     String?  @db.VarChar(50)
+  cRegion     cRegion? @relation(fields: [CodeReg], references: [CodeReg], onDelete: NoAction, onUpdate: NoAction, map: "FK__cVilles__CodeReg__09FF42B4")
+}
+
+model Depot {
+  RefDep         BigInt  @id(map: "PK_Depot")
+  IntituleDep    String? @db.VarChar(20)
+  AdresseDep     String? @db.VarChar(10)
+  CpDep          BigInt?
+  VilleDep       String? @db.VarChar(10)
+  RegionDep      String? @db.VarChar(10)
+  ResponsableDep String? @db.VarChar(30)
+  TeleDep        String? @db.VarChar(15)
+  EmailDep       String? @db.VarChar(30)
+}
+
+model DepotRemplissageGasoil {
+  CodeDepot   BigInt  @id(map: "PK_DepotRemplissageGasoil") @default(autoincrement())
+  DesignDepot String? @db.VarChar(50)
+}
+
+model Depots_Clients {
+  RefDep BigInt
+  CodeCl BigInt
+
+  @@id([RefDep, CodeCl], map: "PK_Depots_Clients")
+}
+
+model DetailRemplacement {
+  Num              BigInt            @id(map: "PK_DetailRemplacement") @default(autoincrement())
+  Code             BigInt?
+  RefArtic         String?           @default("0", map: "DF_DetailRemplacement_RefArtic") @db.VarChar(50)
+  CodeCl           BigInt?
+  CodeFilial       BigInt?
+  Prix             Float?            @db.Real
+  Qte              Float?
+  RemplacerArticle RemplacerArticle? @relation(fields: [Code], references: [Code], onDelete: Cascade, onUpdate: NoAction, map: "FK_DetailRemplacement_RemplacerArticle")
+}
+
+model DIDemandeIntervention {
+  Code             BigInt    @id(map: "PK_DIDemandeIntervention")
+  DIStatut         BigInt?
+  DemandeDe        BigInt?
+  DateDI           DateTime? @db.DateTime
+  HeureDI          String?   @db.VarChar(50)
+  DemandePar       String?   @db.VarChar(20)
+  DIMode           BigInt?
+  DIPriorite       BigInt?
+  DelaiPublic      DateTime? @db.DateTime
+  CodeVehRem       BigInt?
+  VehRem           String?   @db.VarChar(20)
+  DernierIndex     BigInt?
+  NouvIndex        BigInt?
+  OrganeDI         BigInt?
+  DISource         BigInt?
+  DescriptionMotif String?   @db.VarChar(5000)
+  DateDebut        DateTime? @db.DateTime
+  DateFin          DateTime? @db.DateTime
+  Filiale          BigInt?
+  Utilisateur      String?   @db.VarChar(100)
+}
+
+model DIMode {
+  Code        BigInt  @id(map: "PK_ModeDI") @default(autoincrement())
+  Designation String? @db.VarChar(50)
+}
+
+model DIPriorite {
+  Code        BigInt  @id(map: "PK_Priorite") @default(autoincrement())
+  Designation String? @db.VarChar(50)
+}
+
+model Direction {
+  CodeDirec        BigInt       @id(map: "PK_Direction") @default(autoincrement())
+  designationDirec String?      @db.VarChar(50)
+  codeGouv         BigInt?
+  Gouvernorat      Gouvernorat? @relation(fields: [codeGouv], references: [CodeGouv], onDelete: NoAction, onUpdate: NoAction, map: "FK_Direction_Gouvernorat")
+  Service          Service[]
+}
+
+model DISource {
+  Code        BigInt  @id(map: "PK_SourceDI") @default(autoincrement())
+  Designation String? @db.VarChar(50)
+}
+
+model DIStatut {
+  Code        BigInt  @id(map: "PK_StatutDI") @default(autoincrement())
+  Designation String? @db.VarChar(50)
+}
+
+model E_ChauffContraintFormation {
+  MatriculeC  String    @db.VarChar(20)
+  Code        BigInt
+  Designation String?   @db.VarChar(100)
+  DateDebut   DateTime? @db.DateTime
+  DateFin     DateTime? @db.DateTime
+  Alerte      BigInt?
+  Type        String?   @db.VarChar(50)
+  Etat        Boolean?
+  cbmarq      BigInt    @default(autoincrement())
+
+  @@id([MatriculeC, Code, cbmarq], map: "PK_E_ChauffContraintFormation")
+}
+
+model E_ClientContrainteFormation {
+  CodeCl      BigInt
+  Code        BigInt
+  Designation String?   @db.VarChar(100)
+  DateDebut   DateTime? @db.DateTime
+  DateFin     DateTime? @db.DateTime
+  Alerte      BigInt?
+  Type        String?   @db.VarChar(50)
+  TypeFiche   String?   @db.VarChar(50)
+
+  @@id([CodeCl, Code], map: "PK_E_ClientContrainteFormation")
+}
+
+model E_ContrainteFormation {
+  Code           BigInt   @id(map: "PK_E_ContrainteFormation") @default(autoincrement())
+  Designation    String?  @db.VarChar(100)
+  Type           String?  @db.VarChar(50)
+  TypeFiche      String?  @db.VarChar(50)
+  Etat           Boolean?
+  Fractionnement String?  @db.VarChar(50)
+}
+
+model E_ConvContrainteFormation {
+  MatriculeC  String    @db.VarChar(20)
+  Code        BigInt
+  Designation String?   @db.VarChar(100)
+  DateDebut   DateTime? @db.DateTime
+  DateFin     DateTime? @db.DateTime
+  Alerte      BigInt?
+  Type        String?   @db.VarChar(50)
+  Etat        Boolean?
+  cbmarq      BigInt    @default(autoincrement())
+
+  @@id([MatriculeC, Code, cbmarq], map: "PK_E_ConvContrainteFormation")
+}
+
+model E_MecanicienContraintFormation {
+  MatriculeC  String    @db.VarChar(20)
+  Code        BigInt
+  Designation String?   @db.VarChar(100)
+  DateDebut   DateTime? @db.DateTime
+  DateFin     DateTime? @db.DateTime
+  Alerte      BigInt?
+  Type        String?   @db.VarChar(50)
+  Etat        Boolean?
+  cbmarq      BigInt    @default(autoincrement())
+
+  @@id([MatriculeC, Code, cbmarq], map: "PK_E_MecanicienContraintFormation")
+}
+
+model E_RemorqueContrainteFormation {
+  MatriculeRem String    @db.VarChar(20)
+  Code         BigInt
+  Designation  String?   @db.VarChar(100)
+  DateDebut    DateTime? @db.DateTime
+  DateFin      DateTime? @db.DateTime
+  Alerte       BigInt?
+  Type         String?   @db.VarChar(50)
+  Etat         Boolean?
+  cbmarq       BigInt    @default(autoincrement())
+
+  @@id([MatriculeRem, Code, cbmarq], map: "PK_E_RemorqueContrainteFormation")
+}
+
+model E_VehiculeContraintFormation {
+  ImmatriculationVeh String    @db.VarChar(20)
+  Code               BigInt
+  Designation        String?   @db.VarChar(100)
+  DateDebut          DateTime? @db.DateTime
+  DateFin            DateTime? @db.DateTime
+  Alerte             BigInt?
+  Type               String?   @db.VarChar(50)
+  Etat               Boolean?
+  cbmarq             BigInt    @default(autoincrement())
+
+  @@id([ImmatriculationVeh, Code, cbmarq], map: "PK_E_VehiculeContraintFormation")
+}
+
+model EmailCC {
+  ID    BigInt  @id(map: "PK_EmailCC") @default(autoincrement())
+  Email String? @db.VarChar(50)
+}
+
+model EpaisseurPneu {
+  RefArtPneu   String    @db.VarChar(50)
+  NSeriePneu   String    @db.VarChar(50)
+  NumOrdre     BigInt
+  CodeFiliale  BigInt
+  EpaissPneu   Float?    @db.Real
+  DatePrelevem DateTime? @db.SmallDateTime
+
+  @@id([RefArtPneu, NSeriePneu, NumOrdre, CodeFiliale], map: "PK_EpaisseurPneu_1")
+}
+
+model EquivalenceArticle {
+  RefArtic     String @db.VarChar(50)
+  Art_RefArtic String @db.VarChar(50)
+
+  @@id([RefArtic, Art_RefArtic], map: "PK_EquivalenceArticle")
+}
+
+model Extincteurs {
+  NSerieExtinct    String    @db.VarChar(50)
+  RefExtinct       String    @db.VarChar(50)
+  CumuleExtincteur BigInt?
+  DateMontageEx    DateTime? @db.SmallDateTime
+  DateMorgEx       DateTime? @db.SmallDateTime
+  Article          Article   @relation(fields: [RefExtinct], references: [RefArtic], onUpdate: NoAction, map: "FK_Extincteurs_Article")
+
+  @@id([NSerieExtinct, RefExtinct], map: "PK_Extincteurs")
+}
+
+model F_COLLABORATEUR {
+  CO_No             Int?              @unique(map: "ICO_CONO")
+  CO_Nom            String?           @db.VarChar(35)
+  cbCO_Nom          Bytes?            @db.VarBinary(36)
+  CO_Prenom         String?           @db.VarChar(35)
+  cbCO_Prenom       Bytes?            @db.VarBinary(36)
+  CO_Fonction       String?           @db.VarChar(35)
+  cbCO_Fonction     Bytes?            @db.VarBinary(36)
+  CO_Adresse        String?           @db.VarChar(35)
+  CO_Complement     String?           @db.VarChar(35)
+  CO_CodePostal     String?           @db.VarChar(9)
+  CO_Ville          String?           @db.VarChar(35)
+  CO_CodeRegion     String?           @db.VarChar(25)
+  CO_Pays           String?           @db.VarChar(35)
+  CO_Service        String?           @db.VarChar(35)
+  CO_Vendeur        Int?              @db.SmallInt
+  CO_Caissier       Int?              @db.SmallInt
+  CO_DateCreation   DateTime?         @db.SmallDateTime
+  CO_Acheteur       Int?              @db.SmallInt
+  CO_Telephone      String?           @db.VarChar(21)
+  CO_Telecopie      String?           @db.VarChar(21)
+  CO_EMail          String?           @db.VarChar(69)
+  CO_Receptionnaire Int?              @db.SmallInt
+  PROT_No           Int?
+  cbPROT_No         Int?
+  CO_TelPortable    String?           @db.VarChar(21)
+  CO_ChargeRecouvr  Int?              @db.SmallInt
+  cbProt            Int?              @default(0, map: "DF__F_COLLABO__cbPro__503CB573") @db.SmallInt
+  cbMarq            Int               @id(map: "PK_CBMARQ_F_COLLABORATEUR") @default(autoincrement())
+  cbCreateur        String?           @default("CSQL", map: "DF__F_COLLABO__cbCre__5130D9AC") @db.Char(4)
+  cbModification    DateTime?         @default(now(), map: "DF__F_COLLABO__cbMod__5224FDE5") @db.SmallDateTime
+  cbReplication     Int?              @default(0, map: "DF__F_COLLABO__cbRep__5319221E")
+  cbFlag            Int?              @default(0, map: "DF__F_COLLABO__cbFla__540D4657") @db.SmallInt
+  F_PROTECTIONCPTA  F_PROTECTIONCPTA? @relation(fields: [cbPROT_No], references: [PROT_No], onDelete: NoAction, onUpdate: NoAction, map: "FKA_F_COLLABORATEUR_PROT_No")
+
+  @@unique([cbCO_Nom, cbCO_Prenom], map: "ICO_NOM")
+}
+
+model F_COMPTEA {
+  N_Analytique       Int       @db.SmallInt
+  CA_Num             String    @db.VarChar(13)
+  cbCA_Num           Bytes?    @db.VarBinary(15)
+  CA_Intitule        String?   @db.VarChar(35)
+  CA_Type            Int?      @db.SmallInt
+  CA_Classement      String?   @db.VarChar(17)
+  cbCA_Classement    Bytes?    @db.VarBinary(18)
+  CA_Raccourci       String?   @db.VarChar(7)
+  cbCA_Raccourci     Bytes?    @db.VarBinary(8)
+  CA_Report          Int?      @db.SmallInt
+  N_Analyse          Int?      @db.SmallInt
+  CA_Saut            Int?      @db.SmallInt
+  CA_Sommeil         Int?      @db.SmallInt
+  CA_DateCreate      DateTime? @db.SmallDateTime
+  CA_Domaine         Int?      @db.SmallInt
+  CA_Achat           Decimal?  @db.Decimal(24, 6)
+  CA_Vente           Decimal?  @db.Decimal(24, 6)
+  cbProt             Int?      @default(0, map: "DF__F_COMPTEA__cbPro__55016A90") @db.SmallInt
+  cbMarq             Int       @id(map: "PK_CBMARQ_F_COMPTEA") @default(autoincrement())
+  cbCreateur         String?   @default("CSQL", map: "DF__F_COMPTEA__cbCre__55F58EC9") @db.Char(4)
+  cbModification     DateTime? @default(now(), map: "DF__F_COMPTEA__cbMod__56E9B302") @db.SmallDateTime
+  cbReplication      Int?      @default(0, map: "DF__F_COMPTEA__cbRep__57DDD73B")
+  cbFlag             Int?      @default(0, map: "DF__F_COMPTEA__cbFla__58D1FB74") @db.SmallInt
+  Nb_de_ventilations Decimal?  @db.Decimal(24, 6)
+
+  @@unique([N_Analytique, cbCA_Num], map: "ICA_NUM")
+  @@unique([N_Analytique, CA_Num], map: "UKA_F_COMPTEA_CA_Num")
+}
+
+model F_COMPTEG {
+  CG_Num                           String     @unique(map: "UKA_F_COMPTEG_CG_Num") @db.VarChar(13)
+  cbCG_Num                         Bytes?     @unique(map: "ICG_NUM") @db.VarBinary(15)
+  CG_Type                          Int?       @db.SmallInt
+  CG_Intitule                      String?    @db.VarChar(35)
+  CG_Classement                    String?    @db.VarChar(17)
+  cbCG_Classement                  Bytes?     @db.VarBinary(18)
+  N_Nature                         Int?       @db.SmallInt
+  CG_Report                        Int?       @db.SmallInt
+  CR_Num                           String?    @db.VarChar(13)
+  cbCR_Num                         Bytes?     @db.VarBinary(14)
+  CG_Raccourci                     String?    @db.VarChar(7)
+  cbCG_Raccourci                   Bytes?     @db.VarBinary(8)
+  CG_Saut                          Int?       @db.SmallInt
+  CG_Regroup                       Int?       @db.SmallInt
+  CG_Analytique                    Int?       @db.SmallInt
+  CG_Echeance                      Int?       @db.SmallInt
+  CG_Quantite                      Int?       @db.SmallInt
+  CG_Lettrage                      Int?       @db.SmallInt
+  CG_Tiers                         Int?       @db.SmallInt
+  CG_DateCreate                    DateTime?  @db.SmallDateTime
+  CG_Devise                        Int?       @db.SmallInt
+  N_Devise                         Int?       @db.SmallInt
+  TA_Code                          String?    @db.VarChar(5)
+  cbTA_Code                        Bytes?     @db.VarBinary(6)
+  CG_Sommeil                       Int?       @db.SmallInt
+  cbProt                           Int?       @default(0, map: "DF__F_COMPTEG__cbPro__59C61FAD") @db.SmallInt
+  cbMarq                           Int        @id(map: "PK_CBMARQ_F_COMPTEG") @default(autoincrement())
+  cbCreateur                       String?    @default("CSQL", map: "DF__F_COMPTEG__cbCre__5ABA43E6") @db.Char(4)
+  cbModification                   DateTime?  @default(now(), map: "DF__F_COMPTEG__cbMod__5BAE681F") @db.SmallDateTime
+  cbReplication                    Int?       @default(0, map: "DF__F_COMPTEG__cbRep__5CA28C58")
+  cbFlag                           Int?       @default(0, map: "DF__F_COMPTEG__cbFla__5D96B091") @db.SmallInt
+  Dernire_criture                  DateTime?  @db.SmallDateTime
+  Nb_critures                      Decimal?   @db.Decimal(24, 6)
+  F_COMPTER                        F_COMPTER? @relation(fields: [CR_Num], references: [CR_Num], onDelete: NoAction, onUpdate: NoAction, map: "FKA_F_COMPTEG_CR_Num")
+  F_TAXE_F_COMPTEG_TA_CodeToF_TAXE F_TAXE?    @relation("F_COMPTEG_TA_CodeToF_TAXE", fields: [TA_Code], references: [TA_Code], onDelete: NoAction, onUpdate: NoAction, map: "FKA_F_COMPTEG_TA_Code")
+  F_TAXE_F_COMPTEGToF_TAXE_CG_Num  F_TAXE[]   @relation("F_COMPTEGToF_TAXE_CG_Num")
+}
+
+model F_COMPTER {
+  CR_Num          String      @unique(map: "UKA_F_COMPTER_CR_Num") @db.VarChar(13)
+  cbCR_Num        Bytes?      @unique(map: "ICR_NUM") @db.VarBinary(15)
+  CR_Type         Int?        @db.SmallInt
+  CR_Intitule     String?     @db.VarChar(35)
+  CR_Classement   String?     @db.VarChar(17)
+  cbCR_Classement Bytes?      @db.VarBinary(18)
+  CR_Saut         Int?        @db.SmallInt
+  cbProt          Int?        @default(0, map: "DF__F_COMPTER__cbPro__5E8AD4CA") @db.SmallInt
+  cbMarq          Int         @id(map: "PK_CBMARQ_F_COMPTER") @default(autoincrement())
+  cbCreateur      String?     @default("CSQL", map: "DF__F_COMPTER__cbCre__5F7EF903") @db.Char(4)
+  cbModification  DateTime?   @default(now(), map: "DF__F_COMPTER__cbMod__60731D3C") @db.SmallDateTime
+  cbReplication   Int?        @default(0, map: "DF__F_COMPTER__cbRep__61674175")
+  cbFlag          Int?        @default(0, map: "DF__F_COMPTER__cbFla__625B65AE") @db.SmallInt
+  F_COMPTEG       F_COMPTEG[]
+}
+
+model F_DEPOT {
+  DE_No                                          Int?          @unique(map: "IDE_NO")
+  DE_Intitule                                    String        @db.VarChar(35)
+  cbDE_Intitule                                  Bytes?        @unique(map: "IDE_INTITULE") @db.VarBinary(36)
+  DE_Adresse                                     String?       @db.VarChar(35)
+  DE_Complement                                  String?       @db.VarChar(35)
+  DE_CodePostal                                  String?       @db.VarChar(9)
+  DE_Ville                                       String?       @db.VarChar(35)
+  DE_Contact                                     String?       @db.VarChar(35)
+  DE_Principal                                   Int?          @db.SmallInt
+  DE_CatCompta                                   Int?          @db.SmallInt
+  DE_Region                                      String?       @db.VarChar(25)
+  DE_Pays                                        String?       @db.VarChar(35)
+  DE_EMail                                       String?       @db.VarChar(69)
+  DE_Code                                        String?       @db.VarChar(9)
+  cbDE_Code                                      Bytes?        @db.VarBinary(10)
+  DE_Telephone                                   String?       @db.VarChar(21)
+  DE_Telecopie                                   String?       @db.VarChar(21)
+  DE_Replication                                 Int?
+  DP_NoDefaut                                    Int?
+  cbDP_NoDefaut                                  Int?
+  cbProt                                         Int?          @default(0, map: "DF__F_DEPOT__cbProt__6CD8F421") @db.SmallInt
+  cbMarq                                         Int           @id(map: "PK_CBMARQ_F_DEPOT") @default(autoincrement())
+  cbCreateur                                     String?       @default("CSQL", map: "DF__F_DEPOT__cbCreat__6DCD185A") @db.Char(4)
+  cbModification                                 DateTime?     @default(now(), map: "DF__F_DEPOT__cbModif__6EC13C93") @db.SmallDateTime
+  cbReplication                                  Int?          @default(0, map: "DF__F_DEPOT__cbRepli__6FB560CC")
+  cbFlag                                         Int?          @default(0, map: "DF__F_DEPOT__cbFlag__70A98505") @db.SmallInt
+  F_DEPOTEMPL_F_DEPOT_cbDP_NoDefautToF_DEPOTEMPL F_DEPOTEMPL?  @relation("F_DEPOT_cbDP_NoDefautToF_DEPOTEMPL", fields: [cbDP_NoDefaut], references: [DP_No], onDelete: NoAction, onUpdate: NoAction, map: "FKA_F_DEPOT_DP_NoDefaut")
+  F_DEPOTEMPL_F_DEPOTToF_DEPOTEMPL_DE_No         F_DEPOTEMPL[] @relation("F_DEPOTToF_DEPOTEMPL_DE_No")
+}
+
+model F_DEPOTEMPL {
+  DE_No                                      Int
+  DP_No                                      Int?      @unique(map: "IDP_NO")
+  DP_Code                                    String?   @db.VarChar(13)
+  cbDP_Code                                  Bytes?    @db.VarBinary(14)
+  DP_Intitule                                String?   @db.VarChar(35)
+  DP_Zone                                    Int?      @db.SmallInt
+  DP_Type                                    Int?      @db.SmallInt
+  cbProt                                     Int?      @default(0, map: "DF__F_DEPOTEM__cbPro__76625E5B") @db.SmallInt
+  cbMarq                                     Int       @id(map: "PK_CBMARQ_F_DEPOTEMPL") @default(autoincrement())
+  cbCreateur                                 String?   @default("CSQL", map: "DF__F_DEPOTEM__cbCre__77568294") @db.Char(4)
+  cbModification                             DateTime? @default(now(), map: "DF__F_DEPOTEM__cbMod__784AA6CD") @db.SmallDateTime
+  cbReplication                              Int?      @default(0, map: "DF__F_DEPOTEM__cbRep__793ECB06")
+  cbFlag                                     Int?      @default(0, map: "DF__F_DEPOTEM__cbFla__7A32EF3F") @db.SmallInt
+  F_DEPOT_F_DEPOTToF_DEPOTEMPL_DE_No         F_DEPOT   @relation("F_DEPOTToF_DEPOTEMPL_DE_No", fields: [DE_No], references: [DE_No], onUpdate: NoAction, map: "FKA_F_DEPOTEMPL_DE_No")
+  F_DEPOT_F_DEPOT_cbDP_NoDefautToF_DEPOTEMPL F_DEPOT[] @relation("F_DEPOT_cbDP_NoDefautToF_DEPOTEMPL")
+
+  @@unique([DE_No, cbDP_Code], map: "IDP_CODE")
+  @@unique([DE_No, DP_No], map: "UKA_F_DEPOTEMPL_DENO_DPNO")
+}
+
+model F_FAMILLEIMMO {
+  FA_CodeFamille   String    @unique(map: "UKA_F_FAMILLEIMMO_FA_CODE") @db.VarChar(13)
+  cbFA_CodeFamille Bytes?    @unique(map: "IFAI_CODE") @db.VarBinary(15)
+  FA_Type          Int?      @db.SmallInt
+  FA_Intitule      String?   @db.VarChar(35)
+  cbFA_Intitule    Bytes?    @db.VarBinary(36)
+  FA_NatBiens      Int?      @db.SmallInt
+  FA_NatFisc       Int?      @db.SmallInt
+  FA_AEImmo        String?   @db.VarChar(13)
+  cbFA_AEImmo      Bytes?    @db.VarBinary(14)
+  FA_Compte01      String?   @db.VarChar(13)
+  FA_Compte02      String?   @db.VarChar(13)
+  FA_Compte03      String?   @db.VarChar(13)
+  FA_Compte04      String?   @db.VarChar(13)
+  FA_Compte05      String?   @db.VarChar(13)
+  FA_Compte06      String?   @db.VarChar(13)
+  FA_Compte07      String?   @db.VarChar(13)
+  FA_Compte08      String?   @db.VarChar(13)
+  FA_Compte09      String?   @db.VarChar(13)
+  FA_Compte10      String?   @db.VarChar(13)
+  FA_Compte11      String?   @db.VarChar(13)
+  FA_Compte12      String?   @db.VarChar(13)
+  FA_Compte13      String?   @db.VarChar(13)
+  FA_Compte14      String?   @db.VarChar(13)
+  FA_ModeAmort01   Int?      @db.SmallInt
+  FA_ModeAmort02   Int?      @db.SmallInt
+  FA_ModeAmort03   Int?      @db.SmallInt
+  FA_ModeAmort04   Int?      @db.SmallInt
+  FA_ModeAmort05   Int?      @db.SmallInt
+  FA_NbAnnee01     Int?      @db.SmallInt
+  FA_NbAnnee02     Int?      @db.SmallInt
+  FA_NbAnnee03     Int?      @db.SmallInt
+  FA_NbAnnee04     Int?      @db.SmallInt
+  FA_NbAnnee05     Int?      @db.SmallInt
+  FA_NbMois01      Int?      @db.SmallInt
+  FA_NbMois02      Int?      @db.SmallInt
+  FA_NbMois03      Int?      @db.SmallInt
+  FA_NbMois04      Int?      @db.SmallInt
+  FA_NbMois05      Int?      @db.SmallInt
+  FA_Depart01      Int?      @db.SmallInt
+  FA_Depart02      Int?      @db.SmallInt
+  FA_Depart03      Int?      @db.SmallInt
+  FA_Depart04      Int?      @db.SmallInt
+  FA_Depart05      Int?      @db.SmallInt
+  FA_Prorata01     Int?      @db.SmallInt
+  FA_Prorata02     Int?      @db.SmallInt
+  FA_Prorata03     Int?      @db.SmallInt
+  FA_Prorata04     Int?      @db.SmallInt
+  FA_Prorata05     Int?      @db.SmallInt
+  FA_BaseAmort     Decimal?  @db.Decimal(24, 6)
+  FA_Plancher      Decimal?  @db.Decimal(24, 6)
+  FA_Stat01        String?   @db.VarChar(21)
+  FA_Stat02        String?   @db.VarChar(21)
+  FA_Stat03        String?   @db.VarChar(21)
+  FA_Stat04        String?   @db.VarChar(21)
+  FA_Stat05        String?   @db.VarChar(21)
+  FA_Stat06        String?   @db.VarChar(21)
+  FA_Stat07        String?   @db.VarChar(21)
+  FA_Stat08        String?   @db.VarChar(21)
+  FA_Stat09        String?   @db.VarChar(21)
+  FA_Stat10        String?   @db.VarChar(21)
+  N_CategorieTP    Int?      @db.SmallInt
+  FA_EnumPro       String?   @db.VarChar(35)
+  CA_Num           String?   @db.VarChar(13)
+  cbCA_Num         Bytes?    @db.VarBinary(14)
+  cbProt           Int?      @default(0, map: "DF__F_FAMILLE__cbPro__17C35226") @db.SmallInt
+  cbMarq           Int       @id(map: "PK_CBMARQ_F_FAMILLEIMMO") @default(autoincrement())
+  cbCreateur       String?   @default("CSQL", map: "DF__F_FAMILLE__cbCre__18B7765F") @db.Char(4)
+  cbModification   DateTime? @default(now(), map: "DF__F_FAMILLE__cbMod__19AB9A98") @db.SmallDateTime
+  cbReplication    Int?      @default(0, map: "DF__F_FAMILLE__cbRep__1A9FBED1")
+  cbFlag           Int?      @default(0, map: "DF__F_FAMILLE__cbFla__1B93E30A") @db.SmallInt
+}
+
+model F_PROTECTIONCPTA {
+  PROT_User              String             @db.VarChar(35)
+  cbCIPROT_User          Bytes?             @unique(map: "IPROTCPTA_USER") @db.VarBinary(36)
+  PROT_Pwd               String?            @db.VarChar(11)
+  PROT_Description       String?            @db.VarChar(35)
+  PROT_Right             Int?               @db.SmallInt
+  PROT_No                Int?               @unique(map: "IPROTCPTA_NO")
+  PROT_EMail             String?            @db.VarChar(69)
+  PROT_UserProfil        Int?
+  cbPROT_UserProfil      Int?
+  PROT_Administrator     Int?               @db.SmallInt
+  PROT_DatePwd           DateTime?          @db.SmallDateTime
+  PROT_DateCreate        DateTime?          @db.SmallDateTime
+  PROT_LastLoginDate     DateTime?          @db.SmallDateTime
+  PROT_LastLoginTime     String?            @db.Char(9)
+  PROT_PwdStatus         Int?               @db.SmallInt
+  cbProt                 Int?               @default(0, map: "DF__F_PROTECT__cbPro__55C0849F") @db.SmallInt
+  cbMarq                 Int                @id(map: "PK_CBMARQ_F_PROTECTIONCPTA") @default(autoincrement())
+  cbCreateur             String?            @default("CSQL", map: "DF__F_PROTECT__cbCre__56B4A8D8") @db.Char(4)
+  cbModification         DateTime?          @default(now(), map: "DF__F_PROTECT__cbMod__57A8CD11") @db.SmallDateTime
+  cbReplication          Int?               @default(0, map: "DF__F_PROTECT__cbRep__589CF14A")
+  cbFlag                 Int?               @default(0, map: "DF__F_PROTECT__cbFla__59911583") @db.SmallInt
+  F_PROTECTIONCPTA       F_PROTECTIONCPTA?  @relation("F_PROTECTIONCPTAToF_PROTECTIONCPTA_cbPROT_UserProfil", fields: [cbPROT_UserProfil], references: [PROT_No], onDelete: NoAction, onUpdate: NoAction, map: "FKA_F_PROTECTIONCPTA_PROT_UserProfil")
+  F_COLLABORATEUR        F_COLLABORATEUR[]
+  other_F_PROTECTIONCPTA F_PROTECTIONCPTA[] @relation("F_PROTECTIONCPTAToF_PROTECTIONCPTA_cbPROT_UserProfil")
+}
+
+model F_TAXE {
+  TA_Intitule                         String?     @db.VarChar(35)
+  cbTA_Intitule                       Bytes?      @db.VarBinary(36)
+  TA_TTaux                            Int?        @db.SmallInt
+  TA_Taux                             Decimal?    @db.Decimal(24, 6)
+  TA_Type                             Int?        @db.SmallInt
+  CG_Num                              String      @db.VarChar(13)
+  cbCG_Num                            Bytes?      @db.VarBinary(14)
+  TA_No                               Int         @unique(map: "ITA_NO")
+  TA_Code                             String      @unique(map: "UKA_F_TAXE_TA_Code") @db.VarChar(5)
+  cbTA_Code                           Bytes?      @unique(map: "ITA_CODE") @db.VarBinary(6)
+  TA_NP                               Int?        @db.SmallInt
+  TA_Sens                             Int?        @db.SmallInt
+  TA_Provenance                       Int?        @db.SmallInt
+  TA_Regroup                          String?     @db.VarChar(5)
+  cbTA_Regroup                        Bytes?      @db.VarBinary(6)
+  TA_Assujet                          Decimal?    @db.Decimal(24, 6)
+  TA_GrilleBase                       String?     @db.VarChar(3)
+  TA_GrilleTaxe                       String?     @db.VarChar(3)
+  cbProt                              Int?        @default(0, map: "DF__F_TAXE__cbProt__640EA3F6") @db.SmallInt
+  cbMarq                              Int         @id(map: "PK_CBMARQ_F_TAXE") @default(autoincrement())
+  cbCreateur                          String?     @default("CSQL", map: "DF__F_TAXE__cbCreate__6502C82F") @db.Char(4)
+  cbModification                      DateTime?   @default(now(), map: "DF__F_TAXE__cbModifi__65F6EC68") @db.SmallDateTime
+  cbReplication                       Int?        @default(0, map: "DF__F_TAXE__cbReplic__66EB10A1")
+  cbFlag                              Int?        @default(0, map: "DF__F_TAXE__cbFlag__67DF34DA") @db.SmallInt
+  F_COMPTEG_F_COMPTEGToF_TAXE_CG_Num  F_COMPTEG   @relation("F_COMPTEGToF_TAXE_CG_Num", fields: [CG_Num], references: [CG_Num], onUpdate: NoAction, map: "FKA_F_TAXE_CG_Num")
+  F_COMPTEG_F_COMPTEG_TA_CodeToF_TAXE F_COMPTEG[] @relation("F_COMPTEG_TA_CodeToF_TAXE")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model FA_ArticleDefaultMission {
+  RefArticle String? @db.VarChar(50)
+  TypeArt    String? @db.VarChar(50)
+
+  @@ignore
+}
+
+model FA_ArticleFacturation {
+  RefArticle        String             @id(map: "PK_FA_ArticleFacturation") @db.VarChar(50)
+  DesignArticle     String?            @db.VarChar(50)
+  CodeF             String?            @db.VarChar(50)
+  Etat              Boolean?
+  CodeU             BigInt?
+  PrixHT            Float?
+  PrixVente         Float?
+  Qte               Float?
+  Marge             Float?
+  AR_Design         String?            @db.NVarChar(50)
+  FA_FamilleArticle FA_FamilleArticle? @relation(fields: [CodeF], references: [CodeF], onDelete: NoAction, onUpdate: NoAction, map: "FK__FA_Articl__CodeF__1A35AA7D")
+  FA_Unite          FA_Unite?          @relation(fields: [CodeU], references: [CodeU], onDelete: NoAction, onUpdate: NoAction, map: "FK__FA_Articl__CodeU__1D121728")
+}
+
+model FA_ArticleTaxe {
+  RefArticle                                String                @db.VarChar(50)
+  CodeCat                                   BigInt
+  CodeF                                     String                @db.VarChar(50)
+  CGNum                                     String?               @db.VarChar(50)
+  CodeS                                     BigInt?
+  CodeTaxe1                                 String?               @db.VarChar(50)
+  TauxTaxe1                                 Float?
+  CodeTaxe2                                 String?               @db.VarChar(50)
+  TauxTaxe2                                 Float?
+  CodeTaxe3                                 String?               @db.VarChar(50)
+  TauxTaxe3                                 Float?
+  FA_SectionAnalytique                      FA_SectionAnalytique? @relation(fields: [CodeS], references: [CodeS], onDelete: NoAction, onUpdate: NoAction, map: "FK__FA_Articl__CodeS__6498B3DB")
+  FA_Taxe_FA_ArticleTaxe_CodeTaxe1ToFA_Taxe FA_Taxe?              @relation("FA_ArticleTaxe_CodeTaxe1ToFA_Taxe", fields: [CodeTaxe1], references: [CodeT], onDelete: NoAction, onUpdate: NoAction, map: "FK__FA_Articl__CodeT__658CD814")
+  FA_Taxe_FA_ArticleTaxe_CodeTaxe2ToFA_Taxe FA_Taxe?              @relation("FA_ArticleTaxe_CodeTaxe2ToFA_Taxe", fields: [CodeTaxe2], references: [CodeT], onDelete: NoAction, onUpdate: NoAction, map: "FK__FA_Articl__CodeT__6680FC4D")
+  FA_Taxe_FA_ArticleTaxe_CodeTaxe3ToFA_Taxe FA_Taxe?              @relation("FA_ArticleTaxe_CodeTaxe3ToFA_Taxe", fields: [CodeTaxe3], references: [CodeT], onDelete: NoAction, onUpdate: NoAction, map: "FK__FA_Articl__CodeT__67752086")
+
+  @@id([RefArticle, CodeCat], map: "PK_FA_ArticleTaxe")
+}
+
+model FA_CatCompta {
+  CodeCatCompta   BigInt  @id(map: "PK_FA_CatCompta") @default(autoincrement())
+  DesignCatCompta String? @db.VarChar(50)
+}
+
+model FA_ChargeContrat {
+  CodeContrat String   @db.VarChar(50)
+  CodeCharge  String   @db.VarChar(50)
+  Montant     Decimal? @db.Decimal(18, 3)
+
+  @@id([CodeContrat, CodeCharge], map: "PK_FA_ChargeContrat")
+}
+
+model FA_CompteG {
+  CGNum             String   @id(map: "PK_FA_CompteGeneral") @db.VarChar(50)
+  IntituleCG        String?  @db.VarChar(50)
+  AutorisAnalytique Boolean?
+}
+
+model FA_EnteteBonCommande {
+  NSouche           BigInt
+  DO_Piece          String    @db.VarChar(50)
+  Filiale           BigInt?
+  DO_Date           DateTime? @db.DateTime
+  DO_Heure          String?   @db.VarChar(50)
+  Client            String?   @db.VarChar(50)
+  DO_Reference      String?   @db.VarChar(100)
+  Etat              Boolean
+  Transformer       String?   @db.VarChar(50)
+  TransformerSource String?   @db.VarChar(50)
+  TransformerDest   String?   @db.VarChar(50)
+
+  @@id([NSouche, DO_Piece], map: "PK_FA_EnteteBonCommande")
+}
+
+model FA_EnteteBonLivraison {
+  NSouche           BigInt
+  DO_Piece          String    @db.VarChar(50)
+  Filiale           BigInt?
+  DO_Date           DateTime? @db.DateTime
+  DO_Heure          String?   @db.VarChar(50)
+  Client            String?   @db.VarChar(50)
+  DO_Reference      String?   @db.VarChar(100)
+  Etat              Boolean
+  Transformer       String?   @db.VarChar(50)
+  TransformerSource String?   @db.VarChar(50)
+  TransformerDest   String?   @db.VarChar(50)
+
+  @@id([NSouche, DO_Piece], map: "PK_FA_EnteteBonLivraison")
+}
+
+model FA_EnteteDevis {
+  NSouche           BigInt
+  DO_Piece          String    @db.VarChar(50)
+  Filiale           BigInt?
+  DO_Date           DateTime? @db.DateTime
+  DO_Heure          String?   @db.VarChar(50)
+  Client            String?   @db.VarChar(50)
+  DO_Reference      String?   @db.VarChar(100)
+  Etat              Boolean
+  Transformer       String?   @db.VarChar(50)
+  TransformerSource String?   @db.VarChar(50)
+  TransformerDest   String?   @db.VarChar(50)
+
+  @@id([NSouche, DO_Piece], map: "PK_FA_EnteteDevis")
+}
+
+model FA_EnteteFacture {
+  NSouche           BigInt
+  DO_Piece          String    @db.VarChar(50)
+  Filiale           BigInt?
+  DO_Date           DateTime? @db.DateTime
+  DO_Heure          String?   @db.VarChar(50)
+  Client            String?   @db.VarChar(50)
+  DO_Reference      String?   @db.VarChar(100)
+  Etat              Boolean
+  Transformer       String?   @db.VarChar(50)
+  TransformerSource String?   @db.VarChar(50)
+  TransformerDest   String?   @db.VarChar(50)
+  TypeFact          String?   @db.VarChar(50)
+  TypeDeBon         BigInt?
+
+  @@id([NSouche, DO_Piece], map: "PK_FA_EnteteFacture")
+}
+
+model FA_FacturationEnergie {
+  CodeCl      BigInt
+  CodeTypFact String  @db.VarChar(50)
+  LieuDep     BigInt
+  LieuArriv   BigInt
+  PrixU       Float?
+  Marq        Int     @default(autoincrement())
+  Produit     String? @db.VarChar(50)
+  CodeU       BigInt?
+
+  @@id([CodeCl, LieuDep, LieuArriv], map: "PK_FA_FacturationEnergie")
+}
+
+model FA_FacturationForfait {
+  CodeCl       BigInt
+  CodeTypeFact Int?
+  PrixU        Float?
+  CbMarq       BigInt  @default(autoincrement())
+  CodeArticle  String  @db.VarChar(50)
+  CodeU        BigInt?
+
+  @@id([CodeCl, CodeArticle], map: "PK_FA_FacturationForfait")
+}
+
+model FA_FacturationLocation {
+  CodeCl       BigInt
+  CodeTypeFact Int?
+  PrixU        Float?
+  CbMarq       BigInt  @default(autoincrement())
+  CodeArticle  String  @db.VarChar(50)
+  CodeU        BigInt?
+
+  @@id([CodeCl, CodeArticle], map: "PK_FA_FacturationLocation")
+}
+
+model FA_FacturationPrixLieu {
+  CodeCl      BigInt
+  CodeTypFact String  @db.VarChar(50)
+  LieuDep     BigInt
+  LieuArriv   BigInt
+  PrixUTone   Float?
+  Marq        Int     @default(autoincrement())
+  Produit     String  @db.VarChar(50)
+  CodeU       BigInt?
+
+  @@id([CodeCl, LieuDep, LieuArriv, Produit], map: "PK_FA_FacturationPrixLieu_1")
+}
+
+model FA_FacturationToneKm {
+  CodeCl      BigInt
+  CodeTypFact String   @db.VarChar(50)
+  SeuilMinKm  BigInt
+  SeuilMaxKm  BigInt
+  PrixUTone   Float
+  Marq        Int      @default(autoincrement())
+  CodeArticle String   @db.VarChar(50)
+  SupInf      String   @db.VarChar(50)
+  Quantite    Float?
+  Formule     Boolean?
+  Distance    BigInt?
+  Majoration  Float?
+
+  @@id([CodeCl, SeuilMinKm, SeuilMaxKm, SupInf], map: "PK_FA_FacturationToneKm_1")
+}
+
+model FA_FacturationType {
+  Cl_Fact_Type     String? @db.VarChar(50)
+  Cl_fact_Intitule String? @db.VarChar(50)
+  Code             Int     @id(map: "PK_FA_TypeFacturation") @default(autoincrement())
+}
+
+model FA_FacturationTypeCl {
+  CodeCl           BigInt
+  CodeTypeFact     Int
+  TypeFact         String?  @db.VarChar(50)
+  IntituleTypeFact String?  @db.VarChar(50)
+  defaultT         Boolean?
+  CbType           Int      @default(autoincrement())
+
+  @@id([CodeCl, CodeTypeFact], map: "PK_FA_FacturationTypeCl")
+}
+
+model FA_FamilleArticle {
+  CodeF                 String                  @id(map: "PK_FA_FamilleArticle") @db.VarChar(50)
+  DesignF               String?                 @db.VarChar(50)
+  FA_ArticleFacturation FA_ArticleFacturation[]
+}
+
+model FA_FamilleTaxe {
+  CodeCat                                   BigInt
+  CodeF                                     String                @db.VarChar(50)
+  CGNum                                     String?               @db.VarChar(50)
+  CodeS                                     BigInt?
+  CodeTaxe1                                 String?               @db.VarChar(50)
+  TauxTaxe1                                 Float?
+  CodeTaxe2                                 String?               @db.VarChar(50)
+  TauxTaxe2                                 Float?
+  CodeTaxe3                                 String?               @db.VarChar(50)
+  TauxTaxe3                                 Float?
+  FA_SectionAnalytique                      FA_SectionAnalytique? @relation(fields: [CodeS], references: [CodeS], onDelete: NoAction, onUpdate: NoAction, map: "FK__FA_Famill__CodeS__2A6C1246")
+  FA_Taxe_FA_FamilleTaxe_CodeTaxe1ToFA_Taxe FA_Taxe?              @relation("FA_FamilleTaxe_CodeTaxe1ToFA_Taxe", fields: [CodeTaxe1], references: [CodeT], onDelete: NoAction, onUpdate: NoAction, map: "FK__FA_Famill__CodeT__2B60367F")
+  FA_Taxe_FA_FamilleTaxe_CodeTaxe2ToFA_Taxe FA_Taxe?              @relation("FA_FamilleTaxe_CodeTaxe2ToFA_Taxe", fields: [CodeTaxe2], references: [CodeT], onDelete: NoAction, onUpdate: NoAction, map: "FK__FA_Famill__CodeT__2C545AB8")
+  FA_Taxe_FA_FamilleTaxe_CodeTaxe3ToFA_Taxe FA_Taxe?              @relation("FA_FamilleTaxe_CodeTaxe3ToFA_Taxe", fields: [CodeTaxe3], references: [CodeT], onDelete: NoAction, onUpdate: NoAction, map: "FK__FA_Famill__CodeT__2D487EF1")
+
+  @@id([CodeCat, CodeF], map: "PK_FA_FamilleTaxe")
+}
+
+model FA_Filiale {
+  CodeFilial        BigInt  @id(map: "PK_FA_Filiale") @default(autoincrement())
+  DesignationFilial String? @unique(map: "FA_IX_Filiale") @db.VarChar(50)
+}
+
+model FA_Formule {
+  CodeFormule     String  @db.VarChar(50)
+  IntituleFormule String? @db.VarChar(50)
+  TypeFormule     String? @db.VarChar(50)
+  OpFormule       String? @db.VarChar(50)
+  IntituleVar     String? @db.VarChar(50)
+  VariableFormule String? @db.VarChar(50)
+  TableVarFormule String? @db.VarChar(50)
+  Identifiant     String? @db.VarChar(50)
+  CbMarque        BigInt  @default(autoincrement())
+  Formule         String? @db.VarChar(1000)
+
+  @@id([CodeFormule, CbMarque], map: "PK_FA_Formule")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model FA_ImageBonTransport {
+  BonTransport BigInt?
+  Image        Bytes?  @db.Image
+  CodeDoc      BigInt  @default(autoincrement())
+
+  @@ignore
+}
+
+model FA_Journaux {
+  CodeJ            String   @id(map: "PK_FA_Journaux") @db.VarChar(50)
+  IntituleJ        String?  @db.VarChar(50)
+  AutorisAnalytiqJ Boolean?
+  TypeJ            String?  @db.VarChar(50)
+}
+
+model FA_LieuArrive {
+  CodeLieuArrive  BigInt  @id(map: "PK_FA_LieuArrive") @default(autoincrement())
+  DesigLieuArrive String  @db.VarChar(50)
+  AR_Design       String? @db.NVarChar(50)
+  CodeRegion      String? @db.VarChar(50)
+  abreviation     String? @db.NVarChar(50)
+}
+
+model FA_LieuDepart {
+  CodeLieuDepart  BigInt  @id(map: "PK_FA_LieuDepart") @default(autoincrement())
+  DesigLieuDepart String  @db.VarChar(50)
+  AR_Design       String? @db.NVarChar(50)
+  CodeRegion      String? @db.VarChar(50)
+  Abreviation     String? @db.NVarChar(50)
+}
+
+model FA_LieuDistance {
+  CodeDistance   BigInt  @id(map: "PK_FA_LieuDistance") @default(autoincrement())
+  CodeLieuDepart BigInt?
+  CodeLieuArrive BigInt?
+  KmDistance     BigInt?
+}
+
+model FA_LieuDistanceContrat {
+  CodeContrat    String  @db.VarChar(50)
+  CodeLieuDepart BigInt
+  CodeLieuArrive BigInt
+  KmDistance     BigInt?
+
+  @@id([CodeContrat, CodeLieuDepart, CodeLieuArrive], map: "PK_FA_LieuDistanceContrat")
+}
+
+model FA_LigneBonCommande {
+  NSouche     BigInt
+  DO_Piece    String  @db.VarChar(50)
+  Filiale     BigInt
+  Reference   String  @db.VarChar(50)
+  Designation String? @db.VarChar(50)
+  Glossaire   String? @db.VarChar(50)
+  Quantite    Float?
+  Unite       BigInt?
+  PUHT        Float?
+  Remise      Float?
+  MttRemise   Float?
+  THT         Float?
+  TVA1        Float?
+  MttTVA1     Float?
+  TypeTVA1    BigInt?
+  TVA2        Float?
+  MttTVA2     Float?
+  TypeTVA2    BigInt?
+  TVA3        Float?
+  MttTVA3     Float?
+  TypeTVA3    BigInt?
+  PTTC        Float?
+  Code        BigInt  @default(autoincrement())
+  Transformer String? @db.VarChar(50)
+
+  @@id([NSouche, DO_Piece, Filiale, Reference, Code], map: "PK_FA_LigneBonCommande")
+}
+
+model FA_LigneBonLivraison {
+  NSouche     BigInt
+  DO_Piece    String  @db.VarChar(50)
+  Filiale     BigInt
+  Reference   String  @db.VarChar(50)
+  Designation String? @db.VarChar(50)
+  Glossaire   String? @db.VarChar(50)
+  Quantite    Float?
+  Unite       BigInt?
+  PUHT        Float?
+  Remise      Float?
+  MttRemise   Float?
+  THT         Float?
+  TVA1        Float?
+  MttTVA1     Float?
+  TypeTVA1    BigInt?
+  TVA2        Float?
+  MttTVA2     Float?
+  TypeTVA2    BigInt?
+  TVA3        Float?
+  MttTVA3     Float?
+  TypeTVA3    BigInt?
+  PTTC        Float?
+  Code        BigInt  @default(autoincrement())
+  Transformer String? @db.VarChar(50)
+
+  @@id([NSouche, DO_Piece, Filiale, Reference, Code], map: "PK_FA_LigneBonLivraison")
+}
+
+model FA_LigneDevis {
+  NSouche     BigInt
+  DO_Piece    String  @db.VarChar(50)
+  Filiale     BigInt
+  Reference   String  @db.VarChar(50)
+  Designation String? @db.VarChar(50)
+  Glossaire   String? @db.VarChar(50)
+  Quantite    Float?
+  Unite       BigInt?
+  PUHT        Float?
+  Remise      Float?
+  MttRemise   Float?
+  THT         Float?
+  TVA1        Float?
+  MttTVA1     Float?
+  TypeTVA1    BigInt?
+  TVA2        Float?
+  MttTVA2     Float?
+  TypeTVA2    BigInt?
+  TVA3        Float?
+  MttTVA3     Float?
+  TypeTVA3    BigInt?
+  PTTC        Float?
+  Code        BigInt  @default(autoincrement())
+  Transformer String? @db.VarChar(50)
+
+  @@id([NSouche, DO_Piece, Filiale, Reference, Code], map: "PK_FA_LigneDevis")
+}
+
+model FA_LigneFacture {
+  NSouche     BigInt
+  DO_Piece    String    @db.VarChar(50)
+  Filiale     BigInt
+  Reference   String    @db.VarChar(50)
+  Designation String?   @db.VarChar(50)
+  Glossaire   String?   @db.VarChar(50)
+  Quantite    Float?
+  Unite       BigInt?
+  PUHT        Float?
+  Remise      Float?
+  MttRemise   Float?
+  THT         Float?
+  TVA1        Float?
+  MttTVA1     Float?
+  TypeTVA1    BigInt?
+  TVA2        Float?
+  MttTVA2     Float?
+  TypeTVA2    BigInt?
+  TVA3        Float?
+  MttTVA3     Float?
+  TypeTVA3    BigInt?
+  PTTC        Float?
+  Code        BigInt    @default(autoincrement())
+  Transformer String?   @db.VarChar(50)
+  LieuDepart  String?   @db.NVarChar(50)
+  LieuArrive  String?   @db.NVarChar(50)
+  TypeBT      String?   @db.NVarChar(50)
+  Marchandise String?   @db.NVarChar(50)
+  DateBT      DateTime? @db.Date
+  Distance    Float?
+  CodeMission String?   @db.VarChar(50)
+
+  @@id([NSouche, DO_Piece, Filiale, Reference, Code], map: "PK_FA_LigneFacture")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model FA_Marchandise {
+  CodeMarchandise  Int     @default(autoincrement())
+  DesignMachandise String? @db.VarChar(50)
+  AR_Design        String? @db.NVarChar(50)
+
+  @@ignore
+}
+
+model FA_ModeReglement {
+  CodeM         String  @id(map: "PK_FA_ModeReglement") @db.VarChar(50)
+  IntituleM     String? @db.VarChar(50)
+  TypeM         String? @db.VarChar(50)
+  CodeJournauxA String? @db.VarChar(50)
+  CodeJournauxV String? @db.VarChar(50)
+}
+
+model FA_Operationcontrat {
+  Code               String  @id(map: "PK_FA_Operationcontrat") @db.VarChar(50)
+  DesignationContrat String? @db.VarChar(50)
+}
+
+model FA_Operationcout {
+  Code            BigInt  @id(map: "PK_FA_Operationcout") @default(autoincrement())
+  Designationcout String? @db.VarChar(50)
+  Type            BigInt?
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model FA_Option {
+  Langue String? @db.VarChar(50)
+
+  @@ignore
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model FA_Organisation {
+  CodeSouche     BigInt
+  intituleSouche String? @db.VarChar(50)
+  NDevisOrg      BigInt?
+  NBCOrg         BigInt?
+  NBLOrg         BigInt?
+  NFactureOrg    BigInt?
+  NFactureROrg   BigInt?
+  NRegAchOrg     BigInt?
+  NRegVenOrg     BigInt?
+
+  @@ignore
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model FA_ProduitClient {
+  RefProduit String?  @db.VarChar(50)
+  CodeCl     BigInt?
+  Cond1      Decimal? @db.Decimal(18, 3)
+  CoefCh1    Decimal? @db.Decimal(18, 3)
+  Cond2      Decimal? @db.Decimal(18, 3)
+  CoefCh2    Decimal? @db.Decimal(18, 3)
+  CbMarq     BigInt   @default(autoincrement())
+
+  @@ignore
+}
+
+model FA_Produits {
+  RefProduit    String   @id(map: "PK_FA_Produit") @db.VarChar(50)
+  DesignProduit String?  @db.VarChar(50)
+  CodeF         String?  @db.VarChar(50)
+  Etat          Boolean?
+  CodeU         BigInt?
+  PrixHT        Float?
+  PrixVente     Float?
+  Qte           Float?
+  Marge         Float?
+  TVA           Float?
+}
+
+model FA_ProvenanceT {
+  CodeProv    BigInt  @id(map: "PK_FA_ProvenanceT") @default(autoincrement())
+  DesignProvT String? @db.VarChar(50)
+}
+
+model FA_SectionAnalytique {
+  CodeS          BigInt           @id(map: "PK_FA_SectionAnalytique") @default(autoincrement())
+  DesignS        String?          @db.VarChar(50)
+  FA_ArticleTaxe FA_ArticleTaxe[]
+  FA_FamilleTaxe FA_FamilleTaxe[]
+}
+
+model FA_SensT {
+  CodeSensT   BigInt  @id(map: "PK_FA_SensT") @default(autoincrement())
+  designSensT String? @db.VarChar(50)
+}
+
+model FA_Souche {
+  CodeSouche      BigInt   @id(map: "PK_FA_Souche") @default(autoincrement())
+  IntituleSouche  String?  @db.VarChar(50)
+  NDevisSouche    String?  @db.VarChar(50)
+  NBCSouche       String?  @db.VarChar(50)
+  NBLSouche       String?  @db.VarChar(50)
+  NFactureSouche  String?  @db.VarChar(50)
+  NFactureRSouche String?  @db.VarChar(50)
+  NRegAchSouche   String?  @db.VarChar(50)
+  NRegVenSouche   String?  @db.VarChar(50)
+  DefaultS        Boolean?
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model FA_TarifClient {
+  RefArticle     String  @db.VarChar(50)
+  CodeCl         BigInt?
+  IntituleClient String? @db.VarChar(50)
+  PrixAchat      Float?
+  Coef           Float?
+  PrixVente      Float?
+  Remise         Float?
+
+  @@ignore
+}
+
+model FA_Taxe {
+  CodeT                                            String           @id(map: "PK_FA_Taxe") @db.VarChar(50)
+  IntituleT                                        String?          @db.VarChar(50)
+  DescTaux                                         String?          @db.VarChar(50)
+  TauxT                                            Float?
+  CGNum                                            String?          @db.VarChar(50)
+  SensT                                            Int?
+  TypeT                                            Int?
+  CodeRegrouppement                                String?          @db.VarChar(50)
+  Assujettissement                                 Decimal?         @db.Decimal(18, 0)
+  provenance                                       String?          @db.VarChar(50)
+  FA_ArticleTaxe_FA_ArticleTaxe_CodeTaxe1ToFA_Taxe FA_ArticleTaxe[] @relation("FA_ArticleTaxe_CodeTaxe1ToFA_Taxe")
+  FA_ArticleTaxe_FA_ArticleTaxe_CodeTaxe2ToFA_Taxe FA_ArticleTaxe[] @relation("FA_ArticleTaxe_CodeTaxe2ToFA_Taxe")
+  FA_ArticleTaxe_FA_ArticleTaxe_CodeTaxe3ToFA_Taxe FA_ArticleTaxe[] @relation("FA_ArticleTaxe_CodeTaxe3ToFA_Taxe")
+  FA_FamilleTaxe_FA_FamilleTaxe_CodeTaxe1ToFA_Taxe FA_FamilleTaxe[] @relation("FA_FamilleTaxe_CodeTaxe1ToFA_Taxe")
+  FA_FamilleTaxe_FA_FamilleTaxe_CodeTaxe2ToFA_Taxe FA_FamilleTaxe[] @relation("FA_FamilleTaxe_CodeTaxe2ToFA_Taxe")
+  FA_FamilleTaxe_FA_FamilleTaxe_CodeTaxe3ToFA_Taxe FA_FamilleTaxe[] @relation("FA_FamilleTaxe_CodeTaxe3ToFA_Taxe")
+}
+
+model FA_TypeBT {
+  CodeTypeBT   BigInt  @id(map: "PK_FA_TypeBT") @default(autoincrement())
+  DesignTypeBT String? @db.VarChar(50)
+  AR_Design    String? @db.NVarChar(50)
+}
+
+model FA_TypeCharge {
+  Code       BigInt  @id(map: "PK_FA_TypeCharge") @default(autoincrement())
+  TypeCharge String? @db.VarChar(50)
+}
+
+model FA_TypeParametre {
+  CodePar   BigInt  @id(map: "PK_FA_TypeParametre") @default(autoincrement())
+  DesignPar String? @db.VarChar(50)
+}
+
+model FA_TypeTaxe {
+  CodeTypeT   BigInt  @id(map: "PK_FA_TypeTaxe")
+  DesignTypeT String? @db.VarChar(50)
+}
+
+model FA_Unite {
+  CodeU                 BigInt                  @id(map: "PK_FA_Unite") @default(autoincrement())
+  DesignU               String?                 @db.VarChar(50)
+  FA_ArticleFacturation FA_ArticleFacturation[]
+}
+
+model FC_Banque {
+  Code        BigInt  @id(map: "PK_Banque")
+  Designation String? @db.VarChar(30)
+}
+
+model FC_CompteBancaire {
+  CompteBancaire BigInt  @id(map: "PK_FC_CompteBancaire")
+  Banque         BigInt?
+}
+
+model FC_ModeReglement {
+  Code        BigInt   @id(map: "PK_ModeReglement")
+  Designation String?  @db.VarChar(30)
+  Retenu      Boolean?
+}
+
+model FC_Reglement {
+  NPiece           BigInt    @id(map: "PK_FC_Reglement") @default(autoincrement())
+  NReglement       String?   @db.VarChar(50)
+  CompteBancaire   String?   @db.VarChar(50)
+  ModeReglement    BigInt?
+  Montant          Decimal?  @db.Decimal(18, 3)
+  Date             DateTime? @db.DateTime
+  DateEcheance     DateTime? @db.DateTime
+  Fournisseur      String?   @db.VarChar(50)
+  Libelle          String?   @db.VarChar(150)
+  MontantImpute    Decimal?  @db.Decimal(18, 3)
+  MontantRestant   Decimal?  @db.Decimal(18, 3)
+  Retenu           Boolean?
+  TauxRetenu       Decimal?  @db.Decimal(18, 3)
+  NReglementRetenu String?   @db.VarChar(50)
+}
+
+model FC_ReglementFacture {
+  NDocAchat     BigInt
+  NReglement    BigInt
+  NFacture      String?  @db.VarChar(50)
+  MontantImpute Decimal? @db.Decimal(18, 3)
+  Code          BigInt   @id(map: "PK_FC_ReglementFacture") @default(autoincrement())
+}
+
+model Filiale {
+  CodeFilial                                  BigInt                 @id(map: "PK_Filiale") @default(autoincrement())
+  DesignationFilial                           String?                @unique(map: "IX_Filiale") @db.VarChar(50)
+  LigneOrdreReparation                        LigneOrdreReparation[]
+  LigneOrdreSortie                            LigneOrdreSortie[]
+  Location                                    Location[]
+  OrdreAchatGasoil                            OrdreAchatGasoil[]
+  OrdreEntrer                                 OrdreEntrer[]
+  OrdreGazoil                                 OrdreGazoil[]
+  OrdreReparation                             OrdreReparation[]
+  OrdreSortie                                 OrdreSortie[]
+  Transfert_FilialeToTransfert_CodeFilialDest Transfert[]            @relation("FilialeToTransfert_CodeFilialDest")
+  Transfert_FilialeToTransfert_CodeFilialS    Transfert[]            @relation("FilialeToTransfert_CodeFilialS")
+}
+
+model FilialeBlocageKms {
+  Login   String   @id(map: "PK_FilialeBlocageKms") @db.VarChar(50)
+  DiffKMS Float?
+  Etat    Boolean?
+}
+
+model Flexibles {
+  NSerieFlex      String    @db.VarChar(50)
+  RefFlexcib      String    @db.VarChar(50)
+  CumulFlexib     BigInt?
+  DateMontageFlex DateTime? @db.SmallDateTime
+  DateMorgFlex    DateTime? @db.SmallDateTime
+  Article         Article   @relation(fields: [RefFlexcib], references: [RefArtic], onUpdate: NoAction, map: "FK_Flexibles_Article")
+
+  @@id([NSerieFlex, RefFlexcib], map: "PK_Flexibles")
+}
+
+model Fonction {
+  CodeFonc    BigInt    @id(map: "PK_Fonction") @default(autoincrement())
+  designation String?   @db.VarChar(50)
+  VehFonc     VehFonc[]
+}
+
+model FormeSource {
+  Code        Int     @id(map: "PK_FormeSource") @default(autoincrement())
+  Designation String? @db.VarChar(50)
+}
+
+model Fournisseur {
+  CodeFr           String             @id(map: "PK_Fournisseur") @db.VarChar(50)
+  IntituleFr       String?            @db.VarChar(55)
+  ActiviteFr       String?            @db.VarChar(50)
+  AdresseFr        String?            @db.VarChar(500)
+  VilleFr          String?            @db.VarChar(50)
+  CpFr             Int?
+  RegionFr         String?            @db.VarChar(50)
+  CodePays         String?            @db.VarChar(5)
+  TelephFr         String?            @db.VarChar(50)
+  NomctctFr        String?            @db.VarChar(50)
+  PortblFr         String?            @db.VarChar(50)
+  FaxFr            String?            @db.VarChar(50)
+  EmailFr          String?            @db.VarChar(50)
+  FctctctFr        String?            @db.VarChar(50)
+  SiteFr           String?            @db.VarChar(100)
+  ObservationsFr   String?            @db.VarChar(500)
+  Etat             Boolean?
+  MatriculeFiscale String?            @db.VarChar(50)
+  TauxRetenu       Decimal?           @db.Decimal(18, 1)
+  OrdreAchatGasoil OrdreAchatGasoil[]
+}
+
+model Gouvernorat {
+  CodeGouv        BigInt      @id(map: "PK_Gouvernorat") @default(autoincrement())
+  designationGouv String?     @db.VarChar(50)
+  Direction       Direction[]
+}
+
+model GroupsUtilisateurs {
+  CodeDroit        BigInt         @id(map: "PK_Droit") @default(autoincrement())
+  DesignationDroit String?        @unique(map: "IX_Droit") @db.VarChar(50)
+  Utilisateurs     Utilisateurs[]
+}
+
+model HistoriqueAnomalieGazoil {
+  Code               BigInt       @id(map: "PK_HistoriqueAnomalieGazoil") @default(autoincrement())
+  NumOrdre           BigInt?
+  CodeFilial         BigInt?
+  DateOrdre          DateTime?    @db.DateTime
+  ImmatriculationVeh String       @db.VarChar(20)
+  MatriculeC         String?      @db.VarChar(20)
+  IndexVeh           BigInt?      @default(0, map: "DF_HistoriqueAnomalieGazoil_IndexVeh1")
+  QteGaz             Float?       @db.Real
+  MoyConsReel        Float?       @db.Real
+  MoyConTeor         Float?       @db.Real
+  Vehicule           Vehicule     @relation(fields: [ImmatriculationVeh], references: [ImmatriculationVeh], onUpdate: NoAction, map: "FK_HistoriqueAnomalieGazoil_Vehicule")
+  Chauffeur          Chauffeur?   @relation(fields: [MatriculeC], references: [MatriculeC], onDelete: NoAction, onUpdate: NoAction, map: "FK_HistoriqueAnomalieGazoil_Chauffeur")
+  OrdreGazoil        OrdreGazoil? @relation(fields: [NumOrdre, CodeFilial], references: [NumOrdre, CodeFilial], onDelete: Cascade, onUpdate: NoAction, map: "FK_HistoriqueAnomalieGazoil_OrdreGazoil")
+}
+
+model HistoriqueDemontage {
+  NumOrdreRepar    BigInt
+  RefArtic         String  @db.VarChar(50)
+  NSerie           String  @db.VarChar(50)
+  CodeFilial       BigInt
+  Prix             Float   @db.Real
+  CodeVehRem       BigInt
+  RefAchat         BigInt?
+  CodeFilialeAchat BigInt?
+  Origine          Int?
+  NumLigne         BigInt?
+
+  @@id([NumOrdreRepar, RefArtic, NSerie, CodeFilial, Prix, CodeVehRem], map: "PK_HistoriqueDemontage")
+}
+
+model HistoriqueIndexPompe {
+  code_index BigInt   @id(map: "PK_HistoriqueIndexPompe") @default(autoincrement())
+  date_index DateTime @db.SmallDateTime
+  Code_Pompe String   @db.VarChar(50)
+  indexPop   Decimal  @db.Decimal(18, 2)
+  Pompes     Pompes   @relation(fields: [Code_Pompe], references: [Code_Pompe], onUpdate: NoAction, map: "FK_HistoriqueIndexPompe_Pompes")
+}
+
+model HistoriqueIndexVehicule {
+  code_index         BigInt   @id(map: "PK_historique_Index_Vehicule") @default(autoincrement())
+  date_index         DateTime @db.DateTime
+  ImmatriculationVeh String?  @db.VarChar(20)
+  index_veh          BigInt
+  tachygraphe        String?  @db.VarChar(50)
+  NumOrdre           BigInt?
+  Filiale            BigInt?
+  FrmSource          String?  @db.VarChar(50)
+  NumLigne           BigInt?
+  etat               BigInt?  @default(1, map: "DF_HistoriqueIndexVehicule_etat")
+}
+
+model HistoriquePneumatique {
+  ImmatriculationVeh   String    @db.VarChar(20)
+  RefArtic             String    @db.VarChar(50)
+  NSerie               String    @db.VarChar(50)
+  DateMontage          DateTime  @db.SmallDateTime
+  PositionP            BigInt
+  DateDemontage        DateTime? @db.SmallDateTime
+  IndexMontagHPneu     BigInt?
+  IndexDemontagHPneu   BigInt?
+  NumOrdreMontage      BigInt?
+  NumOrdreDemontage    BigInt?
+  CodeFilialeMontage   BigInt?
+  CodeFilialeDemontage BigInt?
+
+  @@id([ImmatriculationVeh, RefArtic, NSerie, DateMontage], map: "PK_HistoriquePneumatique")
+}
+
+model HistoriquePrix {
+  RefAch      BigInt?
+  CodeFilial  BigInt?
+  RefArtic    String  @db.VarChar(50)
+  NSerie      String  @db.VarChar(50)
+  PrixUnit    Float?  @db.Real
+  ImmatVehRem String? @db.VarChar(20)
+  Origine     Int?    @default(0, map: "DF_HistoriquePrix_Origine")
+  Code        BigInt  @id(map: "PK_HistoriquePrix") @default(autoincrement())
+}
+
+model HuileEssuiGlass {
+  CodeHEssuiGlass  BigInt     @id(map: "PK_HuileEssuiGlass") @default(autoincrement())
+  DesigHEssuiGlass String?    @unique(map: "IX_HuileEssuiGlass") @db.VarChar(50)
+  Vehicule         Vehicule[]
+}
+
+model HuileGasoil {
+  CodeHuileGa BigInt     @id(map: "PK_HuileGasoil") @default(autoincrement())
+  DesiHuileGa String?    @unique(map: "IX_HuileGasoil") @db.VarChar(50)
+  Vehicule    Vehicule[]
+}
+
+model HuilePontArr {
+  CodeHPontA  BigInt     @id(map: "PK_HuilePontArr") @default(autoincrement())
+  DesigHPontA String?    @unique(map: "IX_HuilePontArr") @db.VarChar(50)
+  Vehicule    Vehicule[]
+}
+
+model HuilePriseMvt {
+  CodeHPriseMvt  BigInt     @id(map: "PK_HuilePriseMvt") @default(autoincrement())
+  DesigHPriseMvt String?    @unique(map: "IX_HuilePriseMvt") @db.VarChar(50)
+  Vehicule       Vehicule[]
+}
+
+model HuileReductRou {
+  CodeHReductRou  BigInt     @id(map: "PK_HuileReductRou") @default(autoincrement())
+  DesigHReductRou String?    @unique(map: "IX_HuileReductRou") @db.VarChar(50)
+  Vehicule        Vehicule[]
+}
+
+model Image {
+  Code_I      BigInt  @id(map: "PK_Image") @default(autoincrement())
+  Ref         BigInt?
+  Codefiliale BigInt?
+  Img         Bytes?  @db.Image
+  TypeImg     BigInt?
+}
+
+model ImageAccident {
+  Code_I      BigInt  @id(map: "PK_ImageAccident") @default(autoincrement())
+  Ref         BigInt?
+  Codefiliale BigInt?
+  Img         Bytes?  @db.Image
+  TypeImg     BigInt?
+}
+
+model ImageAffaire {
+  Code_I  BigInt @default(autoincrement())
+  Affaire String @db.VarChar(50)
+  IMG     Bytes? @db.Image
+
+  @@id([Code_I, Affaire], map: "PK_ImageAffaire")
+}
+
+model ImageAffectationVehicule {
+  CodeAuto        BigInt    @id(map: "PK_ImageAffectationVehicule") @default(autoincrement())
+  Vehicule        String?   @db.VarChar(50)
+  DateAffectation DateTime? @db.DateTime
+  Image           Bytes?    @db.Image
+}
+
+model ImageAssurance {
+  Code_I    BigInt @default(autoincrement())
+  Assurance Int
+  NContrat  String @db.VarChar(50)
+  Image     Bytes? @db.Image
+
+  @@id([Code_I, Assurance, NContrat], map: "PK_ImageAssuranceccc")
+}
+
+model ImageChauffeur {
+  CodeAuto  BigInt @default(autoincrement())
+  Chauffeur String @db.VarChar(50)
+  Image     Bytes? @db.Image
+
+  @@id([CodeAuto, Chauffeur], map: "PK_ImageChauffeur")
+}
+
+model ImageConvoyeur {
+  CodeAuto  BigInt @default(autoincrement())
+  Convoyeur String @db.VarChar(50)
+  Image     Bytes? @db.Image
+
+  @@id([CodeAuto, Convoyeur], map: "PK_ImageConvoyeur")
+}
+
+model ImageDevis {
+  Code_I BigInt @default(autoincrement())
+  Devis  BigInt
+  IMG    Bytes? @db.Image
+
+  @@id([Code_I, Devis], map: "PK_ImageDevis")
+}
+
+model ImageMecanicien {
+  CodeAuto   BigInt @default(autoincrement())
+  Mecanicien String @db.VarChar(50)
+  Image      Bytes? @db.Image
+
+  @@id([CodeAuto, Mecanicien], map: "PK_ImageMecanicien")
+}
+
+model ImageOR {
+  CodeAuto BigInt @default(autoincrement())
+  OREP     BigInt
+  Image    Bytes? @db.Image
+
+  @@id([CodeAuto, OREP], map: "PK_ImageOR")
+}
+
+model ImagePersonnel {
+  CodeAuto  BigInt @default(autoincrement())
+  Personnel String @db.VarChar(50)
+  Image     Bytes? @db.Image
+
+  @@id([CodeAuto, Personnel], map: "PK_ImagePersonnel")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model ImageRapport {
+  EnteteRapport       Bytes?  @db.Image
+  PiedRapport         Bytes?  @db.Image
+  LogoSociete         Bytes?  @db.Image
+  CheminEnteteRapport String? @db.VarChar(5000)
+  CheminPiedRapport   String? @db.VarChar(5000)
+  CheminLogoSociete   String? @db.VarChar(5000)
+
+  @@ignore
+}
+
+model ImageTaxe {
+  Code_I   BigInt @default(autoincrement())
+  NContrat String @db.VarChar(50)
+  Image    Bytes? @db.Image
+
+  @@id([Code_I, NContrat], map: "PK_ImageTaxesss")
+}
+
+model ImageVehicule {
+  CodeAuto BigInt @default(autoincrement())
+  Vehicule String @db.VarChar(50)
+  Image    Bytes? @db.Image
+
+  @@id([CodeAuto, Vehicule], map: "PK_ImageVehicule")
+}
+
+model ImageVisiteTechnique {
+  Code_I   BigInt @default(autoincrement())
+  NContrat String @db.VarChar(50)
+  Image    Bytes? @db.Image
+
+  @@id([Code_I, NContrat], map: "PK_ImageVisiteTechniquessss")
+}
+
+model Jde {
+  CodeJde            BigInt
+  codeclient         BigInt
+  ImmatriculationVeh String   @db.VarChar(20)
+  Vehicule           Vehicule @relation(fields: [ImmatriculationVeh], references: [ImmatriculationVeh], onUpdate: NoAction, map: "FK_Jde_Vehicule1")
+  Client             Client   @relation(fields: [codeclient], references: [CodeCl], onUpdate: NoAction, map: "FK_Jde_Client1")
+
+  @@id([CodeJde, codeclient], map: "PK_Jde")
+}
+
+model LieuChargement {
+  CodeLieuCharg  BigInt  @id(map: "PK_LieuChargement") @default(autoincrement())
+  DesigLieuCharg String  @db.VarChar(50)
+  AR_Design      String? @db.NVarChar(50)
+  CodeRegion     String? @db.VarChar(50)
+  Abreviation    String? @db.NVarChar(50)
+}
+
+model LieuCouchage {
+  CodeLieuCouchage  BigInt @id(map: "PK_LieuCouchage") @default(autoincrement())
+  DesigLieuCouchage String @db.VarChar(50)
+}
+
+model LieuDechargement {
+  CodeLieudeCharg  BigInt  @id(map: "PK_LieuDechargement") @default(autoincrement())
+  DesigLieudeCharg String  @db.VarChar(50)
+  KMS              Float?
+  AR_Design        String? @db.NVarChar(50)
+  CodeRegion       String? @db.VarChar(50)
+  Abreviation      String? @db.NVarChar(50)
+}
+
+model LieuRepot {
+  CodeLieuRepot  BigInt @id(map: "PK_LieuRepot") @default(autoincrement())
+  DesigLieuRepot String @db.VarChar(50)
+}
+
+model LigneOrdreReparation {
+  NumOrdreRepar   BigInt
+  CodeFilial      BigInt
+  RefArtic        String          @db.VarChar(50)
+  Prix            Decimal         @db.Decimal(18, 3)
+  CodeVehRem      BigInt
+  CodeOrgane      BigInt
+  codeCategRep    BigInt
+  QteRepArt       Float?          @db.Real
+  NumLigne        BigInt
+  Marque          BigInt?
+  QteStk          Float?          @db.Real
+  TypeRep         BigInt?
+  Filiale         Filiale         @relation(fields: [CodeFilial], references: [CodeFilial], onUpdate: NoAction, map: "FK_LigneOrdreReparation_Filiale")
+  VehRem          VehRem          @relation(fields: [CodeVehRem], references: [CodeVehRem], onUpdate: NoAction, map: "FK_LigneOrdreReparation_VehRem")
+  OrdreReparation OrdreReparation @relation(fields: [NumOrdreRepar, CodeFilial], references: [NumOrdreRepar, CodeFilial], onDelete: Cascade, onUpdate: NoAction, map: "FK_LigneOrdreReparation_OrdreReparation")
+  Article         Article         @relation(fields: [RefArtic], references: [RefArtic], onUpdate: NoAction, map: "FK_LigneOrdreReparation_Article")
+
+  @@id([NumOrdreRepar, CodeFilial, RefArtic, Prix, CodeVehRem, CodeOrgane, codeCategRep, NumLigne], map: "PK_LigneOrdreReparation")
+  @@index([CodeOrgane], map: "index_CodeOrgane")
+  @@index([codeCategRep], map: "index_codeCategRep")
+}
+
+model LigneOrdreSortie {
+  Ref_E              BigInt
+  CodeFilial         BigInt
+  RefArtic           String      @db.VarChar(50)
+  PrixUnit           Decimal     @db.Decimal(18, 3)
+  CodeLoc            BigInt?
+  Qte                Float       @db.Real
+  Serial             Boolean?
+  ImmatriculationVeh String?     @db.VarChar(20)
+  Code               BigInt      @id(map: "PK_LigneOrdreSortie") @default(autoincrement())
+  NInv               BigInt?
+  QteEnStock         Decimal?    @db.Decimal(18, 3)
+  Filiale            Filiale     @relation(fields: [CodeFilial], references: [CodeFilial], onUpdate: NoAction, map: "FK_LigneOrdreSortie_Filiale")
+  Article            Article     @relation(fields: [RefArtic], references: [RefArtic], onUpdate: NoAction, map: "FK_LigneOrdreSortie_Article")
+  OrdreSortie        OrdreSortie @relation(fields: [Ref_E, CodeFilial], references: [Ref_E, CodeFilial], onDelete: Cascade, map: "FK_LigneOrdreSortie_OrdreSortie")
+}
+
+model ListeClient {
+  CodeCl         BigInt   @id(map: "PK_ListeClient")
+  IntituleClient String?  @db.VarChar(50)
+  CodeClient     BigInt?
+  RegionCl       BigInt?
+  Observations   String?  @db.VarChar(300)
+  ActiviteCl     String?  @db.VarChar(50)
+  AdresseCl      String?  @db.VarChar(50)
+  VilleCl        String?  @db.VarChar(10)
+  CpCl           BigInt?
+  CodePays       String?  @db.VarChar(20)
+  TelephCl       String?  @db.VarChar(15)
+  Portable       String?  @db.VarChar(15)
+  EmailCl        String?  @db.VarChar(30)
+  SiteCl         String?  @db.VarChar(30)
+  RefDep         BigInt?
+  EtatCli        Boolean?
+}
+
+model Location {
+  CodeLoc         BigInt            @id(map: "PK_Location") @default(autoincrement())
+  DesigLoc        String            @unique(map: "IX_Location") @db.VarChar(50)
+  CodeFilial      BigInt?
+  Filiale         Filiale?          @relation(fields: [CodeFilial], references: [CodeFilial], onDelete: NoAction, onUpdate: NoAction, map: "FK_Location_Filiale")
+  LocationArticle LocationArticle[]
+}
+
+model LocationArticle {
+  RefArtic String   @db.VarChar(50)
+  CodeLoc  BigInt
+  Location Location @relation(fields: [CodeLoc], references: [CodeLoc], onUpdate: NoAction, map: "FK_LocationArticle_Location")
+  Article  Article  @relation(fields: [RefArtic], references: [RefArtic], onDelete: Cascade, map: "FK_LocationArticle_Article")
+
+  @@id([RefArtic, CodeLoc], map: "PK_LocationArticle")
+}
+
+model MarqueArticle {
+  CodeAuto BigInt  @id(map: "PK_MarqueArticle") @default(autoincrement())
+  RefArtic String? @db.VarChar(50)
+  Code     BigInt?
+}
+
+model MarquePneu {
+  Code        BigInt  @id(map: "PK_MarquePneu") @default(autoincrement())
+  Designation String? @db.VarChar(100)
+}
+
+model MarqueVehicule {
+  CodeMarVeh  BigInt     @id(map: "PK_MarqueVehicule") @default(autoincrement())
+  DesigMarque String?    @db.VarChar(50)
+  Vehicule    Vehicule[]
+}
+
+model Mecanicien {
+  MatriculeM     String    @id(map: "PK_Mecanicien") @db.VarChar(50)
+  PrenomM        String?   @db.VarChar(50)
+  NomM           String?   @db.VarChar(50)
+  DateEmbaucheM  DateTime? @db.SmallDateTime
+  NCinM          String?   @db.VarChar(50)
+  DateNaissanceM DateTime? @db.SmallDateTime
+  TelephM        String?   @db.VarChar(100)
+  PortableM      String?   @db.VarChar(100)
+  EmailM         String?   @db.VarChar(50)
+  AdresseM       String?   @db.VarChar(50)
+  VilleM         String?   @db.VarChar(50)
+  CpM            BigInt?
+  NiveauM        String?   @db.VarChar(100)
+  ObservationM   String?   @db.VarChar(500)
+  EtatM          Boolean?
+  Photo          Bytes?    @db.Image
+  Permis         String?   @db.VarChar(50)
+  Qualification  String?   @db.VarChar(50)
+  GSang          String?   @db.VarChar(50)
+}
+
+model Mecanicien_Lieu {
+  CodeLieu   BigInt
+  MatriculeC String    @db.VarChar(20)
+  DateDebut  DateTime  @db.SmallDateTime
+  DateFin    DateTime? @db.SmallDateTime
+  Code       BigInt    @id(map: "PK_Mecanicien_Lieu") @default(autoincrement())
+}
+
+model MecanicienTravaux {
+  NumOrdreRepar BigInt?
+  CodeFilial    BigInt?
+  TravDem       String? @db.VarChar(150)
+  CodeVehRem    BigInt?
+  cbMarq        BigInt  @id(map: "PK_MecanicienTravaux") @default(autoincrement())
+  MatriculeM    String? @db.VarChar(20)
+  PrenomM       String? @db.VarChar(20)
+  NomM          String? @db.VarChar(30)
+  Temps         BigInt?
+  RAF           String? @db.VarChar(150)
+}
+
+model Mission {
+  CodeMiss             BigInt               @id(map: "PK_aaaaa")
+  libelle              String?              @db.VarChar(100)
+  DateD                DateTime?            @db.SmallDateTime
+  DateF                DateTime?            @db.SmallDateTime
+  IndexCout            BigInt?
+  Information          String?              @db.VarChar(5000)
+  Etat                 Boolean?
+  QteInit              Float?               @db.Real
+  ParcourD             BigInt?
+  ParcourF             BigInt?
+  Qte                  Float?
+  Depart               String?              @db.VarChar(100)
+  Arriver              String?              @db.VarChar(100)
+  NBHeureTrv           Float?
+  CodeChauff           String?              @db.VarChar(20)
+  NTelephone           String?              @db.VarChar(50)
+  Lieu                 String?              @db.VarChar(100)
+  CodeVeh              String?              @db.VarChar(20)
+  MatriculeRem         String?              @db.VarChar(20)
+  Kms                  BigInt?
+  HeureDemTrv          DateTime?            @db.Time
+  MatriculeM           String?              @db.VarChar(50)
+  MatVehMec            String?              @db.VarChar(20)
+  IndexD               BigInt?
+  HeureDepart          DateTime?            @db.Time
+  HeureDTrv            DateTime?            @db.Time
+  HeureFTrv            DateTime?            @db.Time
+  HeureRetour          DateTime?            @db.Time
+  IndexF               BigInt?
+  CodeTypeMission      BigInt?
+  T_CodeCl             BigInt?
+  T_Depcharger         Boolean?
+  T_DepVide            Boolean?
+  T_Depsolo            Boolean?
+  T_Rcharger           Boolean?
+  T_RVide              Boolean?
+  T_Rsolo              Boolean?
+  T_Convoyeur          String?              @db.VarChar(20)
+  T_LieuChargement     BigInt?
+  T_LieuDechargement   BigInt?
+  T_NFR                String?              @db.VarChar(50)
+  T_NBI                String?              @db.VarChar(50)
+  T_Instruction        String?              @db.VarChar(8000)
+  T_Materiel           String?              @db.VarChar(8000)
+  DateMission          DateTime?            @db.DateTime
+  T_ReglComptant       Boolean?
+  T_ReglATerme         Boolean?
+  RecurrencePattern    String?              @db.VarChar(Max)
+  MatriculeCahufPane   String?              @db.VarChar(20)
+  NordreRep            BigInt?
+  CodeReg              BigInt?
+  NbMinute             BigInt?
+  InfoLibre1           String?              @db.VarChar(Max)
+  InfoLibre2           String?              @db.VarChar(Max)
+  InfoLibre3           String?              @db.VarChar(Max)
+  InfoLibre4           String?              @db.VarChar(Max)
+  InfoLibre5           String?              @db.VarChar(Max)
+  InfoLibre6           String?              @db.VarChar(Max)
+  InfoLibre7           String?              @db.VarChar(Max)
+  InfoLibre8           String?              @db.VarChar(Max)
+  InfoLibre9           String?              @db.VarChar(Max)
+  InfoLibre10          String?              @db.VarChar(Max)
+  InfoLibre11          String?              @db.VarChar(Max)
+  InfoLibre12          String?              @db.VarChar(Max)
+  InfoLibre13          String?              @db.VarChar(Max)
+  InfoLibre14          String?              @db.VarChar(Max)
+  InfoLibre15          String?              @db.VarChar(Max)
+  InfoLibre16          String?              @db.VarChar(Max)
+  InfoLibre17          String?              @db.VarChar(Max)
+  InfoLibre18          String?              @db.VarChar(Max)
+  InfoLibre19          String?              @db.VarChar(Max)
+  InfoLibre20          String?              @db.VarChar(Max)
+  CodeFilial           BigInt?
+  NConteneur           String?              @db.VarChar(100)
+  jde                  BigInt?
+  codeDepot            BigInt?
+  NTournee             String?              @db.VarChar(50)
+  NBL                  String?              @db.VarChar(50)
+  DateCloture          DateTime?            @db.DateTime
+  HeureCloture         String?              @db.VarChar(50)
+  Responsable          String?              @db.VarChar(100)
+  TypeMissionExpl      String?              @db.VarChar(50)
+  UnJour               Boolean?
+  DeuxJour             Boolean?
+  TroisPlusJ           Boolean?
+  Autoroute            Boolean?
+  RouteNationale       Boolean?
+  RouteSecondaire      Boolean?
+  DistanceConvMissAR   Float?
+  Ecart                Float?
+  Tarif                Float?
+  ChargeSociete        Boolean?
+  ChargeClient         Boolean?
+  Chauffeur2           String?              @db.VarChar(20)
+  StatutMiss           BigInt?
+  FamilleMiss          String?              @db.VarChar(50)
+  TypeMissionTransport String?              @db.VarChar(50)
+  BT_NDoc              String?              @db.VarChar(28)
+  BT_DateDoc           DateTime?            @db.Date
+  BT_NRecu             String?              @db.VarChar(28)
+  BT_DateRecu          DateTime?            @db.Date
+  BT_Produit           String?              @db.VarChar(50)
+  BT_Marchandise       String?              @db.NVarChar(Max)
+  BT_TVA               Float?
+  Observations         String?              @db.NVarChar(Max)
+  BT_Distance          Float?
+  BT_LieuDepart        BigInt?
+  BT_LieuArrive        BigInt?
+  BT_Taxe1             Float?
+  BT_MttTVA1           Float?
+  BT_Taxe2             Float?
+  BT_MttTVA2           Float?
+  BT_Taxe3             Float?
+  BT_MttTVA3           Float?
+  BT_BruteHT           Float?
+  BT_Remise            Float?
+  BT_NetHT             Float?
+  BT_TypeFacUtilis_    String?              @map("BT_TypeFacUtilisé") @db.VarChar(50)
+  BT_PrixUn            Float?
+  BT_TypeBT            BigInt?
+  TransformerSource    String?              @db.VarChar(50)
+  TransformerDest      String?              @db.VarChar(50)
+  BT_Unite             BigInt?
+  BT_Ecart             Float?
+  TypeTVA1             BigInt?
+  TypeTVA2             BigInt?
+  TypeTVA3             BigInt?
+  Formule              String?              @db.VarChar(1000)
+  NV_Tarif             Float?
+  CodeFormule          String?              @db.VarChar(50)
+  BT_Contrat           String?              @db.VarChar(50)
+  Representant         String?              @db.VarChar(50)
+  SousClient           BigInt?
+  Client               Client?              @relation(fields: [T_CodeCl], references: [CodeCl], onDelete: NoAction, onUpdate: NoAction, map: "FK_Mission_Client")
+  CoutMission          CoutMission[]
+  Mission_Personnels   Mission_Personnels[]
+}
+
+model Mission_Personnels {
+  Code       BigInt   @id(map: "PK_Mission_Personnels") @default(autoincrement())
+  CodeMiss   BigInt?
+  MatriculeP String?  @db.VarChar(20)
+  Mission    Mission? @relation(fields: [CodeMiss], references: [CodeMiss], onDelete: Cascade, map: "FK_Mission_Personnels_Mission")
+}
+
+model Missions_Clients {
+  Code               BigInt  @id(map: "PK_Missions_Clients") @default(autoincrement())
+  CodeMiss           BigInt?
+  CodeCl             BigInt?
+  DesignationSClient String? @db.VarChar(50)
+  Qte                BigInt?
+  BL                 String? @db.VarChar(50)
+  Destination        String? @db.VarChar(100)
+  T_LieuRepot        String? @db.VarChar(50)
+  T_LieuCouchage     String? @db.VarChar(50)
+  CodeDestination    BigInt?
+  DistanceConv       BigInt?
+  HeureD             String? @db.VarChar(50)
+  HeureF             String? @db.VarChar(50)
+}
+
+model Missions_Convoyeur {
+  CodeMission BigInt
+  MatriculeC  String @db.VarChar(20)
+
+  @@id([CodeMission, MatriculeC], map: "PK_Missions_Convoyeur")
+}
+
+model Missions_LieuDeChargement {
+  CodeMission      BigInt
+  LieuDeChargement BigInt
+
+  @@id([CodeMission, LieuDeChargement], map: "PK_Missions_LieuDeChargement")
+}
+
+model OeilBoiteVitesse {
+  CodeOeilBteVit  BigInt     @id(map: "PK_OeilBoiteVitesse") @default(autoincrement())
+  DesigOeilBteVit String     @unique(map: "IX_OeilBoiteVitesse") @db.VarChar(50)
+  Vehicule        Vehicule[]
+}
+
+model OeilDirection {
+  CodeOeilDirec  BigInt     @id(map: "PK_OeilDirection") @default(autoincrement())
+  DesigOeilDirec String     @unique(map: "IX_OeilDirection") @db.VarChar(50)
+  Vehicule       Vehicule[]
+}
+
+model OeilEmbrayage {
+  CodeOeilEmbr  BigInt     @id(map: "PK_OeilEmbrayage") @default(autoincrement())
+  DesigOeilEmbr String     @unique(map: "IX_OeilEmbrayage") @db.VarChar(50)
+  Vehicule      Vehicule[]
+
+  @@index([CodeOeilEmbr], map: "IX_OeilEmbrayage_1")
+}
+
+model OeilFrein {
+  CodeOeilFrein  BigInt     @id(map: "PK_OeilFrein") @default(autoincrement())
+  DesigOeilFrein String     @unique(map: "IX_OeilFrein") @db.VarChar(50)
+  Vehicule       Vehicule[]
+}
+
+model OeilMoteur {
+  CodeOeilMot  BigInt     @id(map: "PK_OeilMoteur") @default(autoincrement())
+  DesigOeilMot String     @unique(map: "IX_OeilMoteur") @db.VarChar(50)
+  Vehicule     Vehicule[]
+}
+
+model OeilReferoidissement {
+  CodeOeilRefr  BigInt     @id(map: "PK_OeilReferoidissement") @default(autoincrement())
+  DesigOeilRefr String     @unique(map: "IX_OeilReferoidissement") @db.VarChar(50)
+  Vehicule      Vehicule[]
+}
+
+model OeilReservoireCarburent {
+  CodeOeilGasoil  BigInt     @id(map: "PK_OeilGasoil") @default(autoincrement())
+  DesigOeilGasoil String?    @unique(map: "IX_OeilReservoireCarburent") @db.VarChar(50)
+  Vehicule        Vehicule[]
+}
+
+model OptionAssurance {
+  Code        Int     @id(map: "PK_OptionAssurance") @default(autoincrement())
+  Designation String? @db.VarChar(50)
+}
+
+model OrdreAchatGasoil {
+  RefAch           BigInt
+  CodeFilial       BigInt
+  DateAch          DateTime?    @db.SmallDateTime
+  RefFacture       String?      @db.VarChar(50)
+  CodeFr           String?      @db.VarChar(50)
+  CodeCl           BigInt
+  HeureAchatGasoil String?      @db.VarChar(50)
+  MontantGlobal    Decimal?     @db.Decimal(24, 6)
+  Bloquer          Boolean?     @default(false, map: "DF_OrdreAchatGasoil_Bloquer")
+  Client           Client       @relation(fields: [CodeCl], references: [CodeCl], onUpdate: NoAction, map: "FK_OrdreAchatGasoil_Client")
+  Filiale          Filiale      @relation(fields: [CodeFilial], references: [CodeFilial], onUpdate: NoAction, map: "FK_OrdreAchatGasoil_Filiale")
+  Fournisseur      Fournisseur? @relation(fields: [CodeFr], references: [CodeFr], onDelete: NoAction, onUpdate: NoAction, map: "FK_OrdreAchatGasoil_Fournisseur")
+
+  @@id([RefAch, CodeFilial], map: "PK_OrdreAchatGasoil")
+  @@index([CodeCl], map: "index_CodeCl")
+  @@index([CodeFr], map: "index_CodeFr")
+}
+
+model OrdreEntrer {
+  Ref_E              BigInt
+  CodeFilial         BigInt
+  Date_E             DateTime? @db.DateTime
+  CodeCl             BigInt?
+  CodeEntrer         String?   @db.VarChar(100)
+  ImmatriculationVeh String?   @db.VarChar(20)
+  NumInventaire      BigInt?
+  Client             Client?   @relation(fields: [CodeCl], references: [CodeCl], onDelete: NoAction, onUpdate: NoAction, map: "FK_OrdreEntrer_Client")
+  Filiale            Filiale   @relation(fields: [CodeFilial], references: [CodeFilial], onUpdate: NoAction, map: "FK_OrdreEntrer_Filiale")
+
+  @@id([Ref_E, CodeFilial], map: "PK_OrdreEntrer")
+}
+
+model OrdreGazoil {
+  NumOrdre                 BigInt
+  CodeFilial               BigInt
+  DateOrdre                DateTime?                  @db.SmallDateTime
+  Jour                     Boolean?
+  Nuit                     Boolean?
+  Code_Pompe               String?                    @db.VarChar(50)
+  MatriculePo              String?                    @db.VarChar(20)
+  CpteDepart               Decimal?                   @db.Decimal(18, 2)
+  CpteFin                  Decimal?                   @db.Decimal(18, 2)
+  HeureOrdreGasoil         String?                    @db.VarChar(50)
+  Bloquer                  Boolean?                   @default(false, map: "DF_OrdreGazoil_Bloquer")
+  TypeOR                   Boolean?
+  StockInit                Float?
+  StockFinal               Float?
+  DateFin                  DateTime?                  @db.DateTime
+  HeureFin                 String?                    @db.VarChar(50)
+  Utilisateur              String?                    @db.VarChar(100)
+  UtilisateurCloture       String?                    @db.VarChar(100)
+  Filiale                  Filiale                    @relation(fields: [CodeFilial], references: [CodeFilial], onUpdate: NoAction, map: "FK_OrdreGazoil_Filiale")
+  Pompes                   Pompes?                    @relation(fields: [Code_Pompe], references: [Code_Pompe], onDelete: NoAction, onUpdate: NoAction, map: "FK_OrdreGazoil_Pompes")
+  Pompiste                 Pompiste?                  @relation(fields: [MatriculePo], references: [MatriculePo], onDelete: NoAction, onUpdate: NoAction, map: "FK_OrdreGasoil_Pompiste")
+  HistoriqueAnomalieGazoil HistoriqueAnomalieGazoil[]
+
+  @@id([NumOrdre, CodeFilial], map: "PK_OrdreGasoil")
+  @@index([Code_Pompe], map: "index_Code_Pompe")
+  @@index([MatriculePo], map: "index_MatriculePo")
+}
+
+model OrdreReparation {
+  NumOrdreRepar        BigInt
+  CodeFilial           BigInt
+  DateOrdre            DateTime               @db.DateTime
+  ImmatriculationVeh   String?                @db.VarChar(20)
+  indexVeh             BigInt?
+  MatriculeRem         String?                @db.VarChar(20)
+  indexRem             BigInt?
+  MatriculeC           String?                @db.VarChar(20)
+  CodeCl               BigInt?
+  HeureOrdreRep        String?                @db.VarChar(50)
+  DernierIndex         BigInt?
+  NouvIndex            BigInt?
+  IndexT               BigInt?
+  IndexTAvModif        BigInt?
+  IndexCorr2010        BigInt?
+  Bloquer              Boolean?               @default(false, map: "DF_OrdreReparation_Bloquer")
+  Interieur            Boolean?
+  Exterieur            Boolean?
+  Curatif              Boolean?
+  Pr_ventif            Boolean?               @map("Préventif")
+  BlocNotes            String?                @db.VarChar(5000)
+  DateFin              DateTime?              @db.DateTime
+  HeureFin             String?                @db.VarChar(50)
+  CodeMiss             BigInt?
+  CodeSousClient       BigInt?
+  SousClient           String?                @db.VarChar(50)
+  Statut               BigInt?
+  Utilisateur          String?                @db.VarChar(100)
+  UtilisateurCloture   String?                @db.VarChar(100)
+  Client               Client?                @relation(fields: [CodeCl], references: [CodeCl], onDelete: NoAction, onUpdate: NoAction, map: "FK_OrdreReparation_Client")
+  Filiale              Filiale                @relation(fields: [CodeFilial], references: [CodeFilial], onUpdate: NoAction, map: "FK_OrdreReparation_Filiale")
+  Vehicule             Vehicule?              @relation(fields: [ImmatriculationVeh], references: [ImmatriculationVeh], onDelete: NoAction, onUpdate: NoAction, map: "FK_OrdreReparation_Vehicule")
+  Chauffeur            Chauffeur?             @relation(fields: [MatriculeC], references: [MatriculeC], onDelete: NoAction, onUpdate: NoAction, map: "FK_OrdreReparation_Chauffeur")
+  Remorque             Remorque?              @relation(fields: [MatriculeRem], references: [MatriculeRem], onDelete: NoAction, onUpdate: NoAction, map: "FK_OrdreReparation_Remorque")
+  LigneOrdreReparation LigneOrdreReparation[]
+
+  @@id([NumOrdreRepar, CodeFilial], map: "PK_OrdreReparation")
+  @@index([CodeCl], map: "index_CodeCl")
+  @@index([ImmatriculationVeh], map: "index_ImmatriculationVeh")
+  @@index([MatriculeC], map: "index_MatriculeC")
+  @@index([MatriculeRem], map: "index_MatriculeRem")
+}
+
+model OrdreSortie {
+  Ref_E              BigInt
+  CodeFilial         BigInt
+  Date_E             DateTime?          @db.DateTime
+  CodeCl             BigInt?
+  CodeEntrer         String?            @db.VarChar(100)
+  ImmatriculationVeh String?            @db.VarChar(20)
+  NumInventaire      BigInt?
+  Client             Client?            @relation(fields: [CodeCl], references: [CodeCl], onDelete: NoAction, onUpdate: NoAction, map: "FK_OrdreSortie_Client")
+  Filiale            Filiale            @relation(fields: [CodeFilial], references: [CodeFilial], onUpdate: NoAction, map: "FK_OrdreSortie_Filiale")
+  LigneOrdreSortie   LigneOrdreSortie[]
+
+  @@id([Ref_E, CodeFilial], map: "PK_OrdreSortie")
+}
+
+model OrdreTransfertCarburant {
+  RefTransf                     BigInt
+  CodeFilialS                   BigInt
+  CodeFilialDest                BigInt?
+  Date_Transf                   DateTime?                @db.DateTime
+  Heure_Transf                  String?                  @db.VarChar(50)
+  CodeClDest                    BigInt?
+  Etat                          Boolean?                 @default(false, map: "DF_OrdreTransfertCarburant_Etat")
+  CodeAuto                      BigInt                   @default(autoincrement())
+  OrdreTransfertCarburant       OrdreTransfertCarburant  @relation("OrdreTransfertCarburantToOrdreTransfertCarburant_RefTransf_CodeFilialS", fields: [RefTransf, CodeFilialS], references: [RefTransf, CodeFilialS], onUpdate: NoAction, map: "FK_OrdreTransfertCarburant_OrdreTransfertCarburant")
+  other_OrdreTransfertCarburant OrdreTransfertCarburant? @relation("OrdreTransfertCarburantToOrdreTransfertCarburant_RefTransf_CodeFilialS")
+
+  @@id([RefTransf, CodeFilialS], map: "PK_OrdreTransfertCarburant")
+}
+
+model Organe {
+  CodeOrgane   BigInt  @id(map: "PK_Organe_1") @default(autoincrement())
+  DesignOrgane String? @unique(map: "IX_Organe") @db.VarChar(50)
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model ORREP {
+  NumOrdreRepar      BigInt
+  CodeFilial         BigInt
+  DateOrdre          DateTime @db.DateTime
+  ImmatriculationVeh String?  @db.VarChar(20)
+  indexVeh           BigInt?
+  MatriculeRem       String?  @db.VarChar(20)
+  indexRem           BigInt?
+  MatriculeC         String?  @db.VarChar(20)
+  CodeCl             BigInt?
+  HeureOrdreRep      String?  @db.VarChar(50)
+
+  @@ignore
+}
+
+model P_CATEGORIETP {
+  TP_Intitule String?  @db.VarChar(35)
+  TP_Taux     Decimal? @db.Decimal(24, 6)
+  TP_Plancher Decimal? @db.Decimal(24, 6)
+  TP_Plafond  Decimal? @db.Decimal(24, 6)
+  cbIndice    Int?     @db.SmallInt
+  cbMarq      Int      @id(map: "PK_CBMARQ_P_CATEGORIETP") @default(autoincrement())
+}
+
+model P_CONVEUROIMMO {
+  C_BasculeCompte Int? @db.SmallInt
+  cbMarq          Int  @id(map: "PK_CBMARQ_P_CONVEUROIMMO") @default(autoincrement())
+}
+
+model P_DOSSIER {
+  D_RaisonSoc          String?   @db.VarChar(35)
+  D_Profession         String?   @db.VarChar(35)
+  D_Adresse            String?   @db.VarChar(35)
+  D_Complement         String?   @db.VarChar(35)
+  D_CodePostal         String?   @db.VarChar(9)
+  D_Ville              String?   @db.VarChar(35)
+  D_CodeRegion         String?   @db.VarChar(25)
+  D_Pays               String?   @db.VarChar(35)
+  D_Commentaire        String?   @db.VarChar(69)
+  D_Siret              String?   @db.VarChar(15)
+  D_Ape                String?   @db.VarChar(7)
+  D_Identifiant        String?   @db.VarChar(25)
+  D_DebutExo01         DateTime? @db.SmallDateTime
+  D_DebutExo02         DateTime? @db.SmallDateTime
+  D_DebutExo03         DateTime? @db.SmallDateTime
+  D_DebutExo04         DateTime? @db.SmallDateTime
+  D_DebutExo05         DateTime? @db.SmallDateTime
+  D_FinExo01           DateTime? @db.SmallDateTime
+  D_FinExo02           DateTime? @db.SmallDateTime
+  D_FinExo03           DateTime? @db.SmallDateTime
+  D_FinExo04           DateTime? @db.SmallDateTime
+  D_FinExo05           DateTime? @db.SmallDateTime
+  D_LgCg               Int?      @db.SmallInt
+  D_LgAn               Int?      @db.SmallInt
+  D_FormatQtes         String?   @db.VarChar(31)
+  D_CodeTrait          Int?      @db.SmallInt
+  D_ConfSupp           Int?      @db.SmallInt
+  D_AnalyseGL01        Int?      @db.SmallInt
+  D_AnalyseGL02        Int?      @db.SmallInt
+  D_AnalyseGL03        Int?      @db.SmallInt
+  D_Delai              Int?      @db.SmallInt
+  D_OuvCompte          Int?      @db.SmallInt
+  D_Budget             Int?      @db.SmallInt
+  D_SuppEc             Int?      @db.SmallInt
+  D_RegTaxe            Int?      @db.SmallInt
+  D_Ventil             Int?      @db.SmallInt
+  D_Edi                Int?      @db.SmallInt
+  D_Archivage01        Int?      @db.SmallInt
+  D_Archivage02        Int?      @db.SmallInt
+  D_Archivage03        Int?      @db.SmallInt
+  D_Archivage04        Int?      @db.SmallInt
+  D_Archivage05        Int?      @db.SmallInt
+  D_RBSupp             Int?      @db.SmallInt
+  D_MajImport          Int?      @db.SmallInt
+  D_SaisCab            Int?      @db.SmallInt
+  D_TypeValid          Int?      @db.SmallInt
+  D_ImpressZero        Int?      @db.SmallInt
+  N_DeviseCompte       Int?      @db.SmallInt
+  N_DeviseEquival      Int?      @db.SmallInt
+  D_ANSais             Int?      @db.SmallInt
+  JO_NumAN             String?   @db.VarChar(7)
+  CG_NumANOuv          String?   @db.VarChar(13)
+  CG_NumANBenef        String?   @db.VarChar(13)
+  CG_NumANPerte        String?   @db.VarChar(13)
+  D_TVAEncReg          Int?      @db.SmallInt
+  D_TVAEncAffect       Int?      @db.SmallInt
+  D_DeviseEq           Int?      @db.SmallInt
+  D_AnAffect           Int?      @db.SmallInt
+  D_ReglPiece          Int?      @db.SmallInt
+  D_ExtNeg             Int?      @db.SmallInt
+  D_RapproDevise       Int?      @db.SmallInt
+  D_ImportEqJo         Int?      @db.SmallInt
+  D_ImportEqAn         Int?      @db.SmallInt
+  CG_NumImportDebit    String?   @db.VarChar(13)
+  CG_NumImportCredit   String?   @db.VarChar(13)
+  N_Analytique         Int?      @db.SmallInt
+  D_NumDoss            String?   @db.VarChar(9)
+  D_EMail              String?   @db.VarChar(69)
+  D_EMailExpert        String?   @db.VarChar(69)
+  D_Expert             String?   @db.VarChar(35)
+  D_Telephone          String?   @db.VarChar(21)
+  D_Telecopie          String?   @db.VarChar(21)
+  D_EMailSoc           String?   @db.VarChar(69)
+  D_Site               String?   @db.VarChar(69)
+  D_AppelTiers         Int?      @db.SmallInt
+  D_AppelSection       Int?      @db.SmallInt
+  D_ProtPiece          Int?      @db.SmallInt
+  D_NumCont            Int?      @db.SmallInt
+  D_DateClot           DateTime? @db.SmallDateTime
+  D_CompteGTotal       Int?      @db.SmallInt
+  D_RapproRecherche    Int?      @db.SmallInt
+  D_RapproEcart        Decimal?  @db.Decimal(24, 6)
+  CG_NumRappro         String?   @db.VarChar(13)
+  D_RapproContrepartie Int?      @db.SmallInt
+  D_ComSens            Int?      @db.SmallInt
+  D_ComType            Int?      @db.SmallInt
+  D_ComMoyen           Int?      @db.SmallInt
+  D_ComSoft            Int?      @db.SmallInt
+  D_ComCodeExpert      String?   @db.VarChar(9)
+  D_ComDateSynchro     DateTime? @db.SmallDateTime
+  D_ComGUID            Bytes?    @db.Binary(16)
+  D_RapproTypeEcart    Int?      @db.SmallInt
+  D_RapproReport       Int?      @db.SmallInt
+  JO_NumRapproEscCl    String?   @db.VarChar(7)
+  PI_NoRapproEscCl     Int?
+  JO_NumRapproEscFr    String?   @db.VarChar(7)
+  PI_NoRapproEscFr     Int?
+  D_GestionIFRS        Int?      @db.SmallInt
+  D_SaisieIFRS         Int?      @db.SmallInt
+  N_AnalytiqueIFRS     Int?      @db.SmallInt
+  JA_NumAN             String?   @db.VarChar(7)
+  JO_NumANIFRS         String?   @db.VarChar(7)
+  JA_NumANIFRS         String?   @db.VarChar(7)
+  D_RappelSoldeMin     Decimal?  @db.Decimal(24, 6)
+  D_ImportVentil       Int?      @db.SmallInt
+  D_PenalTaux          Decimal?  @db.Decimal(24, 6)
+  D_PenalImputation    Int?      @db.SmallInt
+  JO_NumPenal          String?   @db.VarChar(7)
+  PI_NoPenal           Int?
+  D_Impayes            Int?      @db.SmallInt
+  JO_NumImpayes        String?   @db.VarChar(7)
+  PI_NoImpayes         Int?
+  D_ImpressFactRef     Int?      @db.SmallInt
+  D_SeuilTVA           Decimal?  @db.Decimal(24, 6)
+  D_NotSaisieSommeil   Int?      @db.SmallInt
+  D_NormeDGI           Int?      @db.SmallInt
+  D_ArchivePeriod      DateTime? @db.SmallDateTime
+  D_ECNoCloture01      Int?
+  D_ECNoCloture02      Int?
+  D_ECNoCloture03      Int?
+  D_ECNoCloture04      Int?
+  D_ECNoCloture05      Int?
+  D_CloturePeriod      DateTime? @db.SmallDateTime
+  cbMarq               Int       @id(map: "PK_CBMARQ_P_DOSSIER") @default(autoincrement())
+}
+
+model P_DOSSIERCIAL {
+  D_RaisonS        String?   @db.VarChar(35)
+  D_FormatQte      String?   @db.VarChar(31)
+  D_FormatPrix     String?   @db.VarChar(31)
+  N_DeviseCompte   Int?      @db.SmallInt
+  N_DeviseEquival  Int?      @db.SmallInt
+  D_ArchivePeriod  DateTime? @db.SmallDateTime
+  D_ValiditePeriod Int?      @db.SmallInt
+  cbMarq           Int       @id(map: "PK_CBMARQ_P_DOSSIERCIAL") @default(autoincrement())
+}
+
+model P_NATUREBIEN {
+  B_Intitule String? @db.VarChar(35)
+  B_Suivi    Int?    @db.SmallInt
+  B_Type     Int?    @db.SmallInt
+  B_Immeuble Int?    @db.SmallInt
+  cbIndice   Int?    @db.SmallInt
+  cbMarq     Int     @id(map: "PK_CBMARQ_P_NATUREBIEN") @default(autoincrement())
+}
+
+model P_PREFERENCESIMMO {
+  PR_Virement        Int? @db.SmallInt
+  PR_Degressif       Int? @db.SmallInt
+  PR_DotAnter        Int? @db.SmallInt
+  PR_CalculCession   Int? @db.SmallInt
+  PR_ReportArrondi   Int? @db.SmallInt
+  PR_RecalculValCess Int? @db.SmallInt
+  PR_ClotureExercice Int? @db.SmallInt
+  PR_DateDot         Int? @db.SmallInt
+  PR_ComptaDotMens   Int? @db.SmallInt
+  cbMarq             Int  @id(map: "PK_CBMARQ_P_PREFERENCESIMMO") @default(autoincrement())
+}
+
+model P_TIERS {
+  T_Principal       Int?    @db.SmallInt
+  T_Val01T_Intitule String? @db.VarChar(17)
+  T_Val01T_TCompte  Int?    @db.SmallInt
+  T_Val01T_Compte   String? @db.VarChar(13)
+  T_Val02T_Intitule String? @db.VarChar(17)
+  T_Val02T_TCompte  Int?    @db.SmallInt
+  T_Val02T_Compte   String? @db.VarChar(13)
+  T_Val03T_Intitule String? @db.VarChar(17)
+  T_Val03T_TCompte  Int?    @db.SmallInt
+  T_Val03T_Compte   String? @db.VarChar(13)
+  T_Val04T_Intitule String? @db.VarChar(17)
+  T_Val04T_TCompte  Int?    @db.SmallInt
+  T_Val04T_Compte   String? @db.VarChar(13)
+  T_Val05T_Intitule String? @db.VarChar(17)
+  T_Val05T_TCompte  Int?    @db.SmallInt
+  T_Val05T_Compte   String? @db.VarChar(13)
+  T_Val06T_Intitule String? @db.VarChar(17)
+  T_Val06T_TCompte  Int?    @db.SmallInt
+  T_Val06T_Compte   String? @db.VarChar(13)
+  T_Val07T_Intitule String? @db.VarChar(17)
+  T_Val07T_TCompte  Int?    @db.SmallInt
+  T_Val07T_Compte   String? @db.VarChar(13)
+  T_Val08T_Intitule String? @db.VarChar(17)
+  T_Val08T_TCompte  Int?    @db.SmallInt
+  T_Val08T_Compte   String? @db.VarChar(13)
+  T_Val09T_Intitule String? @db.VarChar(17)
+  T_Val09T_TCompte  Int?    @db.SmallInt
+  T_Val09T_Compte   String? @db.VarChar(13)
+  T_Val10T_Intitule String? @db.VarChar(17)
+  T_Val10T_TCompte  Int?    @db.SmallInt
+  T_Val10T_Compte   String? @db.VarChar(13)
+  T_Numerotation    Int?    @db.SmallInt
+  T_Lg              Int?    @db.SmallInt
+  T_Racine          String? @db.VarChar(17)
+  cbIndice          Int?    @db.SmallInt
+  cbMarq            Int     @id(map: "PK_CBMARQ_P_TIERS") @default(autoincrement())
+}
+
+model Param_Pneu {
+  RefArtPneu String  @id(map: "PK_EpaisseurPneu") @db.VarChar(50)
+  EpaissMax  Float?  @db.Real
+  EpaissMin  Float?  @db.Real
+  Article    Article @relation(fields: [RefArtPneu], references: [RefArtic], onDelete: Cascade, map: "FK_EpaisseurPneu_Article")
+}
+
+model ParamDistanceConv {
+  CodeDepotRemplCarb BigInt
+  DestinationMission BigInt
+  Distance           BigInt?
+
+  @@id([CodeDepotRemplCarb, DestinationMission], map: "PK_ParamDistanceConv")
+}
+
+model Parametrage {
+  DateOrdreReparation Boolean?
+  DateOrdreCarburant  Boolean?
+  LoginUser           String   @id(map: "PK_Parametrage") @db.VarChar(50)
+}
+
+model Park {
+  CodeParc  BigInt     @id(map: "PK_Park") @default(autoincrement())
+  DesigParc String     @db.VarChar(50)
+  Remorque  Remorque[]
+  Vehicule  Vehicule[]
+}
+
+model Pays {
+  CodePays     String     @id(map: "PK_Pays") @db.VarChar(20)
+  DesignationP String?    @db.VarChar(30)
+  Pompiste     Pompiste[]
+}
+
+model Personnel {
+  MatriculeP     String    @id(map: "PK_Personnel") @db.VarChar(20)
+  PrenomC        String?   @db.VarChar(20)
+  NomC           String?   @db.VarChar(20)
+  DateEmbaucheC  DateTime? @db.DateTime
+  NCinC          BigInt?
+  DateNaissanceC DateTime? @db.DateTime
+  TelephC        String?   @db.VarChar(50)
+  PortableC      String?   @db.VarChar(50)
+  EmailC         String?   @db.VarChar(50)
+  AdresseC       String?   @db.VarChar(50)
+  VilleC         String?   @db.VarChar(50)
+  CpC            BigInt?
+  NiveauC        String?   @db.VarChar(50)
+  ObsevationsC   String?   @db.VarChar(500)
+  EtatC          Boolean?
+  Photo          String?   @db.VarChar(100)
+  Permis         String?   @db.VarChar(20)
+  PhotoCam       Bytes?    @db.Image
+}
+
+model Plan_Action {
+  ID                BigInt    @default(autoincrement())
+  Ref               BigInt
+  CodeFiliale       BigInt
+  Action            String?   @db.VarChar(500)
+  Responsable       String?   @db.VarChar(50)
+  DateAction        DateTime? @db.DateTime
+  CritereEfficacite String?   @db.VarChar(100)
+  Efficacite        String?   @db.VarChar(100)
+  DateCloture       DateTime? @db.DateTime
+
+  @@id([ID, Ref, CodeFiliale], map: "PK_Plan_Action")
+}
+
+model Pneumatique {
+  RefArtic     String    @db.VarChar(50)
+  NSerie       String    @db.VarChar(50)
+  DateMiseCirc DateTime  @db.SmallDateTime
+  IndexP       BigInt
+  DateArreCirc DateTime? @db.SmallDateTime
+
+  @@id([RefArtic, NSerie, DateMiseCirc], map: "PK_Pneumatique")
+}
+
+model Pompes {
+  Code_Pompe           String                 @id(map: "PK_Pompes") @db.VarChar(50)
+  CodeFilial           BigInt
+  DesignationPomp      String?                @db.VarChar(50)
+  RefPompe             BigInt?
+  CodeTyCarbu          BigInt?
+  Capacit__Pompe       Float?                 @map("Capacité_Pompe") @db.Real
+  Qt__Actuelle         Float?                 @default(0, map: "DF_Pompes_Qté_Actuelle") @map("Qté_Actuelle") @db.Real
+  Stock_min            Float?                 @db.Real
+  CMUP                 Decimal?               @db.Decimal(18, 6)
+  IndexDepart          Decimal?               @db.Decimal(18, 2)
+  QteInitial           Decimal?               @db.Decimal(18, 3)
+  HistoriqueIndexPompe HistoriqueIndexPompe[]
+  OrdreGazoil          OrdreGazoil[]
+}
+
+model Pompiste {
+  MatriculePo          String                 @id(map: "PK_Pompiste") @db.VarChar(20)
+  PrenomPo             String?                @db.VarChar(20)
+  NomPo                String?                @db.VarChar(20)
+  DateEmbauchePo       DateTime?              @db.DateTime
+  EtatPo               Boolean?
+  NCinPo               BigInt?
+  DateNaissancePo      DateTime?              @db.DateTime
+  TelephPo             String?                @db.VarChar(20)
+  GSM_Po               String?                @db.VarChar(20)
+  EmailPo              String?                @db.VarChar(50)
+  AdressePo            String?                @db.VarChar(20)
+  VillePo              String?                @db.VarChar(20)
+  CpPo                 Int?
+  CodePays             String?                @db.VarChar(20)
+  NumeroP              BigInt?
+  NiveauPo             String?                @db.VarChar(20)
+  ObsevationsPo        String?                @db.VarChar(500)
+  PhotoPo              Bytes?                 @db.Image
+  Pays                 Pays?                  @relation(fields: [CodePays], references: [CodePays], onDelete: Cascade, onUpdate: NoAction, map: "FK_Pompiste_Pays")
+  OrdreGazoil          OrdreGazoil[]
+  Pompiste_CategPermis Pompiste_CategPermis[]
+}
+
+model Pompiste_CategPermis {
+  MatriculePo      String           @db.VarChar(20)
+  CodeCategorie    BigInt
+  DateP            DateTime?        @db.SmallDateTime
+  CategoriesPermis CategoriesPermis @relation(fields: [CodeCategorie], references: [CodeCategorie], onUpdate: NoAction, map: "FK_Pompiste_CategPermis_CategoriesPermis")
+  Pompiste         Pompiste         @relation(fields: [MatriculePo], references: [MatriculePo], onUpdate: NoAction, map: "FK_Pompiste_CategPermis_Pompiste")
+
+  @@id([MatriculePo, CodeCategorie], map: "PK_Pompiste_CategPermis")
+}
+
+model PressionPneu {
+  RefArtPneu   String    @db.VarChar(50)
+  NSeriePneu   String    @db.VarChar(50)
+  NumOrdre     BigInt
+  CodeFiliale  BigInt
+  Pression     Float?    @db.Real
+  DatePrelevem DateTime? @db.SmallDateTime
+  HeurePreleve String?   @db.VarChar(50)
+
+  @@id([RefArtPneu, NSeriePneu, NumOrdre, CodeFiliale], map: "PK_PressionPneu")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model Profils {
+  NomForm    String? @db.VarChar(50)
+  CodeDroit  BigInt?
+  NomControl String? @db.VarChar(50)
+
+  @@ignore
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model Profils1 {
+  NomForm    String? @db.VarChar(50)
+  CodeDroit  BigInt?
+  NomControl String? @db.VarChar(50)
+
+  @@ignore
+}
+
+model RapportAccident {
+  Ref                     BigInt
+  CodeFiliale             BigInt
+  Lieu                    String?   @db.VarChar(50)
+  Gouvernement            String?   @db.VarChar(50)
+  Tracteur                String?   @db.VarChar(20)
+  Citerne                 String?   @db.VarChar(20)
+  Affectation             String?   @db.VarChar(50)
+  Date                    DateTime? @db.DateTime
+  HeureAccident           String?   @db.VarChar(50)
+  Destination             String?   @db.VarChar(50)
+  Chauffeur               String?   @db.VarChar(20)
+  AncienneteSMTT          DateTime? @db.DateTime
+  ValiditePermis          DateTime? @db.DateTime
+  ValiditeCertifMed       DateTime? @db.DateTime
+  ValiditeTMD             DateTime? @db.DateTime
+  DerniFormSecour         DateTime? @db.DateTime
+  DerniFormConduiteDef    DateTime? @db.DateTime
+  DerniFormLutteIncendie  DateTime? @db.DateTime
+  DerniFormConduiteRation DateTime? @db.DateTime
+  Faits                   String?   @db.VarChar(8000)
+  ActionsPrise            String?   @db.VarChar(500)
+  CausesFond              String?   @db.VarChar(500)
+  CausesProf              String?   @db.VarChar(500)
+  Degats                  String?   @db.VarChar(500)
+  Consequence             String?   @db.VarChar(500)
+  IncidentEvite           String?   @db.VarChar(500)
+  LeconARetenir           String?   @db.VarChar(500)
+  MesureDisciplinaire     String?   @db.VarChar(500)
+  EApersonne              String?   @db.VarChar(50)
+  EAbien                  String?   @db.VarChar(50)
+  EAenvironnement         String?   @db.VarChar(50)
+  EAimage                 String?   @db.VarChar(50)
+  EPpersonne1             String?   @db.VarChar(50)
+  EPbien1                 String?   @db.VarChar(50)
+  EPenvironnement1        String?   @db.VarChar(50)
+  EPimage1                String?   @db.VarChar(50)
+  EAclients               String?   @db.VarChar(50)
+  EAresultats             String?   @db.VarChar(50)
+  EPclients               String?   @db.VarChar(50)
+  EPresultats             String?   @db.VarChar(50)
+
+  @@id([Ref, CodeFiliale], map: "PK_RapportAccident")
+}
+
+model Region {
+  CodeReg        BigInt  @id(map: "PK_Regionn") @default(autoincrement())
+  designationReg String? @db.VarChar(50)
+  codeGouv       BigInt?
+}
+
+model Region1 {
+  CodeReg        BigInt  @id(map: "PK_Region") @default(autoincrement())
+  designationReg String? @db.VarChar(50)
+  codeGouv       BigInt?
+}
+
+model Remorque {
+  MatriculeRem        String                @id(map: "PK_Remorque") @db.VarChar(20)
+  CodeTypeRemorque    BigInt
+  NChassisRem         String                @db.VarChar(50)
+  IndexRem            BigInt?
+  CumuleRem           BigInt?               @default(0, map: "DF_Remorque_CumuleRem")
+  PoidsRem            Float?                @db.Real
+  PtraRem             Float?                @db.Real
+  CapaciteRem         Float?                @db.Real
+  NbrCompRem          BigInt?
+  DesigTyPneu         String?               @db.VarChar(50)
+  NbrPneuRem          BigInt?
+  ChargeRem           Float?                @db.Real
+  DateMC              DateTime?             @db.SmallDateTime
+  DateAchat           DateTime?             @db.SmallDateTime
+  CodeParc            BigInt?
+  CodeCl              BigInt?
+  CodeTySusAv         BigInt?
+  CodeTySusArr        BigInt?
+  RefEssieu           BigInt?
+  AbsRemork           Boolean?
+  Gazoil              Boolean?
+  Observations        String?               @db.VarChar(500)
+  Remarques           String?               @db.VarChar(500)
+  Etat                Boolean?
+  ABS                 Boolean?
+  EBS                 Boolean?
+  EssieuRelvable      Boolean?
+  EssieuSuiveur       Boolean?
+  ChargementEnSource  Boolean?
+  AffectationClient   BigInt?
+  DerDateRenovation   DateTime?             @db.DateTime
+  DateEtanchite       DateTime?             @db.DateTime
+  DiametreTrouHomme   Float?                @db.Real
+  TypeJauge           BigInt?
+  EtatImmo            Boolean?
+  ValeurAcquisition   Float?                @db.Real
+  Park                Park?                 @relation(fields: [CodeParc], references: [CodeParc], onDelete: NoAction, onUpdate: NoAction, map: "FK_Remorque_Park")
+  TypeRemorque        TypeRemorque          @relation(fields: [CodeTypeRemorque], references: [CodeTypeRemorque], onUpdate: NoAction, map: "FK_Remorque_TypeRemorque")
+  OrdreReparation     OrdreReparation[]
+  Remorque_Extincteur Remorque_Extincteur[]
+  Remorque_Flexibles  Remorque_Flexibles[]
+  Vehicule_Remorque   Vehicule_Remorque[]
+}
+
+model Remorque_Extincteur {
+  MatriculeRem            String    @db.VarChar(20)
+  RefExtinct              String    @db.VarChar(50)
+  NSerieExtinct           String    @db.VarChar(50)
+  DateExtMontage          DateTime  @db.SmallDateTime
+  DateExtDemontage        DateTime? @db.SmallDateTime
+  IndexExtMontage         BigInt?
+  IndexExtDemontage       BigInt?
+  NumOrdreMontage         BigInt?
+  NumOrdreDemontageontage BigInt?
+  CodeFilialMontage       BigInt?
+  CodeFilialDemontage     BigInt?
+  Remorque                Remorque  @relation(fields: [MatriculeRem], references: [MatriculeRem], onUpdate: NoAction, map: "FK_Remorque_Extincteur_Remorque")
+
+  @@id([MatriculeRem, RefExtinct, NSerieExtinct, DateExtMontage], map: "PK_Remorque_Extincteur")
+}
+
+model Remorque_Flexibles {
+  MatriculeRem        String    @db.VarChar(20)
+  RefFlexcib          String    @db.VarChar(50)
+  NSerieFlex          String    @db.VarChar(50)
+  DateFlexMontage     DateTime  @db.SmallDateTime
+  DateFlexDemontage   DateTime? @db.SmallDateTime
+  IndexFlxMontage     BigInt?
+  IndexFlxDemontage   BigInt?
+  NumOrdreMontage     BigInt?
+  NumOrdreDemontage   BigInt?
+  CodeFilialMontage   BigInt?
+  CodeFilialDemontage BigInt?
+  Remorque            Remorque  @relation(fields: [MatriculeRem], references: [MatriculeRem], onUpdate: NoAction, map: "FK_Remorque_Flexibles_Remorque")
+
+  @@id([MatriculeRem, RefFlexcib, NSerieFlex, DateFlexMontage], map: "PK_Veh_Flexibles")
+}
+
+model RemplacerArticle {
+  Code               BigInt               @id(map: "PK_RemplacerArticle")
+  RefArtic           String               @db.VarChar(50)
+  Art_RefArtic       String               @db.VarChar(50)
+  Article            Article              @relation(fields: [RefArtic], references: [RefArtic], onUpdate: NoAction, map: "FK_RemplacerArticle_Article")
+  DetailRemplacement DetailRemplacement[]
+}
+
+model SerialiseArticleTemp {
+  CodeTransfert  String? @db.VarChar(100)
+  RefAch         BigInt?
+  CodeFilial     BigInt?
+  RefArtic       String? @db.VarChar(50)
+  NSerie         String? @db.VarChar(50)
+  PrixUnit       Float?  @db.Real
+  ImmatVehRem    String? @db.VarChar(20)
+  NumLigne       BigInt  @id(map: "PK_SerialiseArticleTemp") @default(autoincrement())
+  Etat           Int?    @default(0, map: "DF_SerialiseArticleTemp_Etat")
+  CodeFilialDest BigInt?
+  CodeFilialS    BigInt?
+  TypeOperation  Int?    @default(0, map: "DF_SerialiseArticleTemp_TypeOperation")
+}
+
+model SerialiserArticle {
+  RefAch      BigInt?
+  CodeFilial  BigInt?
+  RefArtic    String   @db.VarChar(50)
+  NSerie      String   @db.VarChar(50)
+  PrixUnit    Decimal? @db.Decimal(18, 3)
+  ImmatVehRem String?  @db.VarChar(20)
+  NumLigne    BigInt   @id(map: "PK_SerialiserArticle") @default(autoincrement())
+  Origine     Int?     @default(0, map: "DF_SerialiserArticle_Origine")
+  CodeM       BigInt?
+
+  @@index([RefAch, CodeFilial, RefArtic, PrixUnit], map: "index_SerialiserArticle")
+}
+
+model SerieArticleConsommer {
+  NumOrdreRepar    BigInt
+  RefArtic         String  @db.VarChar(50)
+  NSerie           String  @db.VarChar(50)
+  CodeFilial       BigInt
+  Prix             Decimal @db.Decimal(18, 3)
+  CodeVehRem       BigInt
+  RefAchat         BigInt?
+  CodeFilialeAchat BigInt?
+  Origine          Int?
+  NumLigne         BigInt?
+
+  @@id([NumOrdreRepar, RefArtic, NSerie, CodeFilial, Prix, CodeVehRem], map: "PK_SerieArticleConsommer")
+}
+
+model Service {
+  CodeService   BigInt     @id(map: "PK_Service") @default(autoincrement())
+  designation   String?    @db.VarChar(50)
+  CodeDirection BigInt?
+  Direction     Direction? @relation(fields: [CodeDirection], references: [CodeDirec], onDelete: NoAction, onUpdate: NoAction, map: "FK_Service_Direction")
+  VehServ       VehServ[]
+}
+
+model Situation {
+  CodeSituation  BigInt @id(map: "PK_Situation") @default(autoincrement())
+  DesigSituation String @db.VarChar(50)
+}
+
+model SousTraitance {
+  CodeSousTraitance     BigInt @id(map: "PK_SousTraitance") @default(autoincrement())
+  IntituleSousTraitance String @db.VarChar(50)
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model SP_Societe {
+  RS           String? @db.VarChar(50)
+  adresse      String? @db.VarChar(50)
+  CP           String? @db.VarChar(50)
+  ville        String? @db.VarChar(50)
+  pays         String? @db.VarChar(50)
+  Tel          String? @db.VarChar(50)
+  telecopie    String? @db.VarChar(50)
+  codeNAF      String? @db.VarChar(50)
+  NSiret       String? @db.VarChar(50)
+  NIdentifiant String? @db.VarChar(50)
+  Effectif     String? @db.VarChar(50)
+  Civilite     String? @db.VarChar(50)
+  Nom          String? @db.VarChar(50)
+  Prenom       String? @db.VarChar(50)
+  gsm          String? @db.VarChar(50)
+  fonction     String? @db.VarChar(50)
+  Email        String? @db.VarChar(50)
+  MotdePass    String? @db.VarChar(30)
+
+  @@ignore
+}
+
+model StatutMission {
+  Code        BigInt  @id(map: "PK_StatutM") @default(autoincrement())
+  Designation String? @db.VarChar(50)
+}
+
+model StatutOR {
+  Code        BigInt  @id(map: "PK_StatutOR_1") @default(autoincrement())
+  Designation String? @db.VarChar(50)
+}
+
+model StockArticle {
+  RefArtic     String  @default("0", map: "DF_ss_RefArtic") @db.VarChar(50)
+  PrixUnit     Decimal @db.Decimal(18, 3)
+  CodeFilial   BigInt
+  CodeCl       BigInt
+  QteAchat     Float
+  QteConsommee Float?  @default(0, map: "DF_ss_QteConsommee")
+
+  @@id([RefArtic, PrixUnit, CodeFilial, CodeCl], map: "PK_StockArticle")
+  @@index([CodeCl], map: "index_CodeCl")
+  @@index([CodeFilial], map: "index_CodeFilial")
+  @@index([RefArtic], map: "index_RefArtic")
+}
+
+model StockTemp {
+  CodeTransfert String  @db.VarChar(100)
+  RefArtic      String  @db.VarChar(50)
+  PrixUnit      Decimal @db.Decimal(18, 3)
+  CodeFilial    BigInt
+  CodeCl        BigInt
+  QteAchat      Float
+  QteConsommee  Float?  @default(0, map: "DF_StockTemp_QteConsommee")
+  Etat          Int?    @default(0, map: "DF_StockTemp_Etat")
+
+  @@id([CodeTransfert, RefArtic, PrixUnit, CodeFilial, CodeCl], map: "PK_StockTemp")
+}
+
+model StockTempTCarb {
+  CodeTransfert BigInt
+  CodeFilialS   BigInt
+  TypeCab       BigInt?
+  PompeSour     String?  @db.VarChar(50)
+  PompeDest     String?  @db.VarChar(50)
+  PrixUnit      Decimal? @db.Decimal(18, 6)
+  QteAch        Float?
+  QteConsommee  Float?   @default(0, map: "DF_StockTempTCarb_QteConsommee")
+  Etat          Int?     @default(0, map: "DF_StockTempTCarb_Etat")
+
+  @@id([CodeTransfert, CodeFilialS], map: "PK_StockTempTCarb")
+}
+
+model StructurePneumatique {
+  ImmatriculationVeh String @db.VarChar(20)
+  PositionP          BigInt
+
+  @@id([ImmatriculationVeh, PositionP], map: "PK_StructurePneumatique")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model tabIndex {
+  index              BigInt?
+  ImmatriculationVeh String? @db.VarChar(20)
+
+  @@ignore
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model TableFinalManqueNSerie2 {
+  RefAch      BigInt?
+  CodeFilial  BigInt?
+  RefArtic    String  @db.VarChar(50)
+  NSerie      String  @db.VarChar(50)
+  PrixUnit    Float?  @db.Real
+  ImmatVehRem String? @db.VarChar(20)
+  Origine     Int?
+  Code        BigInt  @default(autoincrement())
+
+  @@ignore
+}
+
+model Tachygraphe {
+  NSerie            String    @db.VarChar(50)
+  RefTachygraphe    String    @db.VarChar(50)
+  CumulTachyg       BigInt?
+  DateMontageTachyg DateTime? @db.SmallDateTime
+  DateMorgueTachyg  DateTime? @db.SmallDateTime
+  Article           Article   @relation(fields: [RefTachygraphe], references: [RefArtic], onUpdate: NoAction, map: "FK_Tachygraphe_Article")
+
+  @@id([NSerie, RefTachygraphe], map: "PK_Tachygraphe")
+}
+
+model TachygrapheVehiculRepar {
+  ImmatriculationVeh   String    @db.VarChar(20)
+  NSerie               String    @db.VarChar(50)
+  RefTachygraphe       String    @db.VarChar(50)
+  DateTachyMontag      DateTime  @db.SmallDateTime
+  DateTachyDemontag    DateTime? @db.SmallDateTime
+  IndexTachygMontage   BigInt
+  IndexTachygDemontage BigInt?
+  NumOrdreMontage      BigInt?
+  NumOrdreDemontage    BigInt?
+  CodeFilialMontage    BigInt?
+  CodeFilialDemontage  BigInt?
+  Vehicule             Vehicule  @relation(fields: [ImmatriculationVeh], references: [ImmatriculationVeh], onUpdate: NoAction, map: "FK_TachygrapheVehiculRepar_Vehicule")
+
+  @@id([ImmatriculationVeh, NSerie, RefTachygraphe, DateTachyMontag], map: "PK_TachygrapheVehiculRepar")
+}
+
+model TaxeVignette_ListeVehicule {
+  Vehicule      String @db.VarChar(50)
+  NContrat      Int
+  MontantD_tail Float? @map("MontantDétail")
+
+  @@id([Vehicule, NContrat], map: "PK_TaxeVignette_Vehicule000")
+}
+
+model TaxeVignette_Vehicule {
+  NContrat       Int       @id(map: "PK_TaxeVignette_Vehiculeqqq")
+  DateEffetDebut DateTime? @db.SmallDateTime
+  DateEffetFin   DateTime? @db.SmallDateTime
+  R_f_rence      String?   @map("Référence") @db.VarChar(100)
+  Alerte         BigInt?
+  Montant        Decimal?  @db.Decimal(18, 3)
+  Glossaire      String?   @db.VarChar(8000)
+  Fractionnement String?   @db.VarChar(50)
+  Etat           Boolean?
+  Filiale        BigInt?
+  Departement    BigInt?
+}
+
+model TCarteCarburant {
+  NumCarte       String    @db.VarChar(50)
+  OperateurCarte BigInt
+  IntituleCarte  String?   @db.VarChar(50)
+  TypeCarte      BigInt?
+  Vehicule       String?   @db.VarChar(20)
+  MatChauffeur   String?   @db.VarChar(20)
+  Etat           Boolean?
+  SoldeCarte     Float?
+  Departement    BigInt?
+  Direction      BigInt?
+  CodeCarte      String?   @db.VarChar(50)
+  DateExpir      DateTime? @db.DateTime
+  PrixUnitaire   Float?
+
+  @@id([NumCarte, OperateurCarte], map: "PK_TCarteCarburant")
+}
+
+model TOperateurCarte {
+  CodeOperateur  BigInt  @id(map: "PK_TOperateurCarte") @default(autoincrement())
+  OperateurCarte String? @db.VarChar(50)
+}
+
+model Transfert {
+  RefTransf                                 BigInt
+  CodeFilialS                               BigInt
+  CodeFilialDest                            BigInt?
+  Date_Transf                               DateTime? @db.DateTime
+  Heure_Transf                              String?   @db.VarChar(50)
+  CodeClDest                                BigInt?
+  Etat                                      Boolean?  @default(false, map: "DF_Transfert_Etat")
+  CodeTransfert                             String?   @db.VarChar(100)
+  Utilisateur                               String?   @db.VarChar(50)
+  Client                                    Client?   @relation(fields: [CodeClDest], references: [CodeCl], onDelete: NoAction, onUpdate: NoAction, map: "FK_Transfert_Client")
+  Filiale_FilialeToTransfert_CodeFilialDest Filiale?  @relation("FilialeToTransfert_CodeFilialDest", fields: [CodeFilialDest], references: [CodeFilial], onDelete: NoAction, onUpdate: NoAction, map: "FK_Transfert_Filiale1")
+  Filiale_FilialeToTransfert_CodeFilialS    Filiale   @relation("FilialeToTransfert_CodeFilialS", fields: [CodeFilialS], references: [CodeFilial], onUpdate: NoAction, map: "FK_Transfert_Filiale")
+
+  @@id([RefTransf, CodeFilialS], map: "PK_Transfert")
+}
+
+model Traveaux {
+  NumOrdreRepar    BigInt
+  CodeFilial       BigInt
+  TravDem          String  @db.VarChar(150)
+  CodeVehRem       BigInt
+  TravExec         String? @db.VarChar(150)
+  CodeOrgane       BigInt?
+  MatriculeM       String? @db.VarChar(50)
+  TempsTD          BigInt?
+  RAF              String? @db.VarChar(150)
+  Prix_Heure       Float?  @db.Real
+  codeAuto         BigInt  @default(autoincrement())
+  OrdreRAF         BigInt?
+  FilialeSource    BigInt?
+  RAFExec          String? @db.VarChar(150)
+  CodeIntervention BigInt?
+  TypeRep          BigInt?
+
+  @@id([NumOrdreRepar, CodeFilial, TravDem, CodeVehRem, codeAuto], map: "PK_Traveaux")
+  @@index([CodeOrgane], map: "index_CodeOrgane")
+  @@index([CodeVehRem], map: "index_CodeVehRem")
+  @@index([MatriculeM], map: "index_MatriculeM")
+}
+
+model TrouPneu {
+  RefArtPneu   String    @db.VarChar(50)
+  NSeriePneu   String    @db.VarChar(50)
+  NumOrdre     BigInt
+  CodeFiliale  BigInt
+  NbrTrou      Float?    @db.Real
+  DatePrelevem DateTime? @db.SmallDateTime
+  HeurePreleve String?   @db.VarChar(50)
+
+  @@id([RefArtPneu, NSeriePneu, NumOrdre, CodeFiliale], map: "PK_TrouPneu")
+}
+
+model TypeAccident {
+  Code        Int     @id(map: "PK_TypeAccident") @default(autoincrement())
+  Designation String? @db.VarChar(50)
+}
+
+model TypeAvantTrain {
+  CodeTyAvTr  BigInt     @id(map: "PK_TypeAvantTrain") @default(autoincrement())
+  DesigTyAvTr String     @unique(map: "IX_TypeAvantTrain") @db.VarChar(50)
+  Vehicule    Vehicule[]
+}
+
+model TypeBoiteDirection {
+  CodeTyBtDir  BigInt     @id(map: "PK_TypeBoiteDirection") @default(autoincrement())
+  DesigTyBtDir String     @unique(map: "IX_TypeBoiteDirection") @db.VarChar(50)
+  Vehicule     Vehicule[]
+}
+
+model TypeBoiteVitesse {
+  CodeTyBteVit  BigInt     @id(map: "PK_TypeBoiteVitesse") @default(autoincrement())
+  DesigTyBteVit String     @unique(map: "IX_TypeBoiteVitesse") @db.VarChar(50)
+  Vehicule      Vehicule[]
+}
+
+model TypeCarburent {
+  CodeTyCarbu  BigInt @id(map: "PK_TypeCarburent") @default(autoincrement())
+  DesigTyCarbu String @db.VarChar(50)
+}
+
+model TypeCarteCarburant {
+  CodeTC            BigInt  @id(map: "PK_TypeCarteCarburant") @default(autoincrement())
+  IntituleTypeCarte String? @db.VarChar(50)
+}
+
+model TypeDocAdmin {
+  Code        BigInt   @id(map: "PK_TypeDocAdmin") @default(autoincrement())
+  Designation String?  @db.VarChar(100)
+  TD          Boolean?
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model TypeDocument {
+  Type_document Int?
+  Document      String? @db.VarChar(50)
+
+  @@ignore
+}
+
+model TypeEmbrayage {
+  CodeTyEmbr  BigInt     @id(map: "PK_TypeEmbrayage") @default(autoincrement())
+  DesigTyEmbr String     @unique(map: "IX_TypeEmbrayage") @db.VarChar(50)
+  Vehicule    Vehicule[]
+}
+
+model TypeEssieu {
+  RefEssieu   BigInt @id(map: "PK_TypeEssieu") @default(autoincrement())
+  DesigEssieu String @db.VarChar(50)
+}
+
+model TypeExtincteursVeh {
+  RefExtinct String @id(map: "PK_ExtincteursVeh") @db.VarChar(50)
+}
+
+model TypeFlexcibleVehi {
+  RefFlexcib String @id(map: "PK_FlexcibleVehi") @db.VarChar(50)
+}
+
+model TypeMission {
+  Code        Int     @id(map: "PK_TypeMission") @default(autoincrement())
+  Designation String? @db.VarChar(50)
+  SmallIcon   Bytes?  @db.Image
+}
+
+model TypeMoteur {
+  CodeTyMot  BigInt     @id(map: "PK_TypeMoteur") @default(autoincrement())
+  DesigTyMot String     @unique(map: "IX_TypeMoteur") @db.VarChar(50)
+  Vehicule   Vehicule[]
+}
+
+model TypePneu {
+  DesigTyPneu String @id(map: "PK_TypePneu") @unique(map: "IX_TypePneu") @db.VarChar(50)
+}
+
+model TypePompe {
+  RefPompe   BigInt @id(map: "PK_TypePompe") @default(autoincrement())
+  DesigPompe String @unique(map: "IX_TypePompe") @db.VarChar(50)
+}
+
+model TypePontArriere {
+  CodeTyPontArri  BigInt     @id(map: "PK_TypePontArriere") @default(autoincrement())
+  DesigTyPontArri String     @unique(map: "IX_TypePontArriere") @db.VarChar(50)
+  Vehicule        Vehicule[]
+}
+
+model TypeRemorque {
+  CodeTypeRemorque      BigInt     @id(map: "PK_TypeRemorque")
+  DesignationTyRemorque String     @db.VarChar(30)
+  Immo                  Boolean?
+  EtatImmo              Boolean?
+  Remorque              Remorque[]
+  Vehicule              Vehicule[]
+}
+
+model TypeReparation {
+  CodeT   BigInt  @id(map: "PK_TypeReparation") @default(autoincrement())
+  Libelle String? @db.VarChar(50)
+}
+
+model TypeSuspontionArriere {
+  CodeTySusArr  BigInt     @id(map: "PK_TypeSuspontionArriere") @default(autoincrement())
+  DesigTySusArr String     @unique(map: "IX_TypeSuspontionArriere") @db.VarChar(50)
+  Vehicule      Vehicule[]
+}
+
+model TypeSuspontionAvant {
+  CodeTySusAv  BigInt     @id(map: "PK_TypeSuspontionAvant") @default(autoincrement())
+  DesigTySusAv String     @unique(map: "IX_TypeSuspontionAvant") @db.VarChar(50)
+  Vehicule     Vehicule[]
+}
+
+model TypeTachygraphe {
+  RefTachygraphe String @id(map: "PK_TypeTachygraphe") @db.VarChar(50)
+}
+
+model TypeVehicule {
+  CodeTyVeh           BigInt                @id(map: "PK_TypeVehicule")
+  IntituleTyVeh       String                @db.VarChar(30)
+  Immo                Boolean?
+  EtatImmo            Boolean?
+  Alerte              Alerte[]
+  ArticleTypeVehicule ArticleTypeVehicule[]
+  Vehicule            Vehicule[]
+  VisitesPreventifs   VisitesPreventifs[]
+}
+
+model User {
+  ID        Int     @id @default(autoincrement())
+  Email     String  @unique
+  Password  String
+  FirstName String
+  LastName  String
+  Role      String  @default("DRIVER")
+  Phone     String
+  Image     String?
+}
+
+model Utilisateurs {
+  CodeUser           BigInt              @default(autoincrement())
+  LoginUser          String              @db.VarChar(50)
+  MotPassUser        String?             @db.VarChar(50)
+  NomUser            String?             @db.VarChar(50)
+  PrenomUser         String?             @db.VarChar(50)
+  CodeDroit          BigInt?
+  Connect            String?             @db.VarChar(50)
+  GroupsUtilisateurs GroupsUtilisateurs? @relation(fields: [CodeDroit], references: [CodeDroit], onDelete: NoAction, onUpdate: NoAction, map: "FK_Utilisateurs_GroupsUtilisateurs")
+
+  @@id([CodeUser, LoginUser], map: "PK_Utilisateur")
+  @@index([CodeDroit], map: "index_CodeDroit")
+}
+
+model VehFonc {
+  codeVF   BigInt    @id(map: "PK_VehFonc")
+  codeF    BigInt?
+  codeV    String?   @db.VarChar(20)
+  DateD    DateTime? @db.DateTime
+  DateF    DateTime? @db.DateTime
+  Fonction Fonction? @relation(fields: [codeF], references: [CodeFonc], onDelete: NoAction, onUpdate: NoAction, map: "FK_VehFonc_Fonction")
+  Vehicule Vehicule? @relation(fields: [codeV], references: [ImmatriculationVeh], onDelete: NoAction, onUpdate: NoAction, map: "FK_VehFonc_Vehicule")
+}
+
+model Vehi_Extin {
+  ImmatriculationVeh  String    @db.VarChar(20)
+  RefExtinct          String    @db.VarChar(50)
+  NSerieExtinct       String    @db.VarChar(50)
+  DateExtMontage      DateTime  @db.SmallDateTime
+  DateExtDemontage    DateTime? @db.SmallDateTime
+  IndexExtMontage     BigInt?
+  IndexExtDemontage   BigInt?
+  NumOrdreMontage     BigInt?
+  NumOrdreDemontage   BigInt?
+  CodeFilialMontage   BigInt?
+  CodeFilialDemontage BigInt?
+  Vehicule            Vehicule  @relation(fields: [ImmatriculationVeh], references: [ImmatriculationVeh], onUpdate: NoAction, map: "FK_Vehi_Extin_Vehicule")
+
+  @@id([ImmatriculationVeh, RefExtinct, NSerieExtinct, DateExtMontage], map: "PK_Vehi_Extin")
+}
+
+model Vehicule {
+  ImmatriculationVeh       String                     @id(map: "PK_Vehicule") @db.VarChar(20)
+  CodeTyVeh                BigInt?
+  CodeMarVeh               BigInt?
+  Etat                     Boolean?
+  CodeCl                   BigInt?
+  IndexeVeh                BigInt?
+  CumuleKms                BigInt?                    @default(0, map: "DF_Vehicule_CumuleKms")
+  NbrPneux                 BigInt?
+  Gaz                      Boolean?
+  Climatiseur              Boolean?
+  MotoPompe                Boolean?
+  NChassis                 String?                    @db.VarChar(50)
+  Ptra                     String?                    @db.VarChar(20)
+  CodeTyMot                BigInt?
+  CodeTyEmbr               BigInt?
+  CodeTyBteVit             BigInt?
+  CodeTyBtDir              BigInt?
+  CodeTyAvTr               BigInt?
+  CodeTyPontArri           BigInt?
+  CodeTySusAv              BigInt?
+  CodeTySusArr             BigInt?
+  PoidsVide                Float?                     @db.Real
+  MoyenneConsommation      Float?                     @db.Real
+  CodeTypeRemorque         BigInt?
+  Chargeutile              String?                    @db.VarChar(50)
+  DateMiseEnService        DateTime?                  @db.SmallDateTime
+  DateAchat                DateTime?                  @db.SmallDateTime
+  CodeParc                 BigInt?
+  DesigTyPneu              String?                    @db.VarChar(50)
+  CodeOeilMot              BigInt?
+  QteHuileMot              Float?                     @db.Real
+  CodeOeilBteVit           BigInt?
+  QteHuileBv               Float?                     @db.Real
+  CodeOeilEmbr             BigInt?
+  QteHEmb                  Float?                     @db.Real
+  CodeOeilDirec            BigInt?
+  QteHDirect               Float?                     @db.Real
+  CodeOeilRefr             BigInt?
+  QteHRefroid              Float?                     @db.Real
+  CodeOeilFrein            BigInt?
+  QteHFrein                Float?                     @db.Real
+  CodeOeilGasoil           BigInt?
+  QteHReservCarb           Float?                     @db.Real
+  CodeHEssuiGlass          BigInt?
+  QteHuilEssuiG            Float?                     @db.Real
+  CodeHPontA               BigInt?
+  QteHPArt                 Float?                     @db.Real
+  CodeHReductRou           BigInt?
+  QteHReR                  Float?                     @db.Real
+  CodeHPriseMvt            BigInt?
+  QteHPMvt                 Float?                     @db.Real
+  CodeHuileGa              BigInt?
+  QteHGasoil               Float?                     @db.Real
+  Remarques                String?                    @db.VarChar(500)
+  Observations             String?                    @db.VarChar(500)
+  IndexT                   BigInt?                    @default(0, map: "DF_Vehicule_IndexT")
+  IndexTAvModif            BigInt?
+  ParcourDepart            BigInt?                    @default(0, map: "DF_Vehicule_ParcourDepart")
+  FrmSource                String?                    @db.VarChar(100)
+  CodeTyCarbu              BigInt?
+  NumCarte                 String?                    @db.VarChar(50)
+  NbPlace                  Int?
+  CodeOperationBon         Int?
+  NbreLittreBonGasoil      BigInt?
+  NbreBonGasoil            BigInt?
+  DateBonGas               DateTime?                  @db.DateTime
+  DateProchBon             DateTime?                  @db.DateTime
+  RTMT                     Boolean?
+  ABS                      Boolean?
+  EBS                      Boolean?
+  AntiBrouillard           Boolean?
+  AffectationClient        BigInt?
+  TRMT                     Boolean?
+  SousClient               BigInt?
+  ReferenceTachygraphe     String?                    @db.VarChar(50)
+  NSerieTachygraphe        String?                    @db.VarChar(50)
+  PuissanceFiscal          BigInt?
+  ValeurAcquisition        Float?                     @db.Real
+  ValeurVCN                Float?                     @db.Real
+  CodeSituation            BigInt?
+  EtatImmo                 Boolean?
+  CodeVehiculeCarburant    String?                    @db.VarChar(50)
+  SousTraitance            Boolean?
+  SousTraitant             BigInt?
+  SuiviKmHeure             Boolean?
+  Abreviation              String?                    @db.NVarChar(50)
+  PTC                      String?                    @db.VarChar(50)
+  PTAC                     String?                    @db.VarChar(50)
+  NumeroPolice             String?                    @db.VarChar(50)
+  MatParcEtablissement     String?                    @db.VarChar(50)
+  NCarteGris               String?                    @db.VarChar(50)
+  Assurance                Boolean?
+  NbrPlace                 BigInt?
+  Client                   Client?                    @relation(fields: [CodeCl], references: [CodeCl], onDelete: NoAction, onUpdate: NoAction, map: "FK_Vehicule_Client")
+  HuileEssuiGlass          HuileEssuiGlass?           @relation(fields: [CodeHEssuiGlass], references: [CodeHEssuiGlass], onDelete: NoAction, onUpdate: NoAction, map: "FK_Vehicule_HuileEssuiGlass")
+  HuilePontArr             HuilePontArr?              @relation(fields: [CodeHPontA], references: [CodeHPontA], onDelete: NoAction, onUpdate: NoAction, map: "FK_Vehicule_HuilePontArr")
+  HuilePriseMvt            HuilePriseMvt?             @relation(fields: [CodeHPriseMvt], references: [CodeHPriseMvt], onDelete: NoAction, onUpdate: NoAction, map: "FK_Vehicule_HuilePriseMvt")
+  HuileReductRou           HuileReductRou?            @relation(fields: [CodeHReductRou], references: [CodeHReductRou], onDelete: NoAction, onUpdate: NoAction, map: "FK_Vehicule_HuileReductRou")
+  HuileGasoil              HuileGasoil?               @relation(fields: [CodeHuileGa], references: [CodeHuileGa], onDelete: NoAction, onUpdate: NoAction, map: "FK_Vehicule_HuileGasoil")
+  MarqueVehicule           MarqueVehicule?            @relation(fields: [CodeMarVeh], references: [CodeMarVeh], onDelete: NoAction, onUpdate: NoAction, map: "FK_Vehicule_MarqueVehicule")
+  OeilBoiteVitesse         OeilBoiteVitesse?          @relation(fields: [CodeOeilBteVit], references: [CodeOeilBteVit], onDelete: NoAction, onUpdate: NoAction, map: "FK_Vehicule_OeilBoiteVitesse")
+  OeilDirection            OeilDirection?             @relation(fields: [CodeOeilDirec], references: [CodeOeilDirec], onDelete: NoAction, onUpdate: NoAction, map: "FK_Vehicule_OeilDirection")
+  OeilEmbrayage            OeilEmbrayage?             @relation(fields: [CodeOeilEmbr], references: [CodeOeilEmbr], onDelete: NoAction, onUpdate: NoAction, map: "FK_Vehicule_OeilEmbrayage")
+  OeilFrein                OeilFrein?                 @relation(fields: [CodeOeilFrein], references: [CodeOeilFrein], onDelete: NoAction, onUpdate: NoAction, map: "FK_Vehicule_OeilFrein")
+  OeilReservoireCarburent  OeilReservoireCarburent?   @relation(fields: [CodeOeilGasoil], references: [CodeOeilGasoil], onDelete: NoAction, onUpdate: NoAction, map: "FK_Vehicule_OeilReservoireCarburent")
+  OeilMoteur               OeilMoteur?                @relation(fields: [CodeOeilMot], references: [CodeOeilMot], onDelete: NoAction, onUpdate: NoAction, map: "FK_Vehicule_OeilMoteur")
+  OeilReferoidissement     OeilReferoidissement?      @relation(fields: [CodeOeilRefr], references: [CodeOeilRefr], onDelete: NoAction, onUpdate: NoAction, map: "FK_Vehicule_OeilReferoidissement")
+  Park                     Park?                      @relation(fields: [CodeParc], references: [CodeParc], onDelete: NoAction, onUpdate: NoAction, map: "FK_Vehicule_Park")
+  TypeAvantTrain           TypeAvantTrain?            @relation(fields: [CodeTyAvTr], references: [CodeTyAvTr], onDelete: NoAction, onUpdate: NoAction, map: "FK_Vehicule_TypeAvantTrain")
+  TypeBoiteDirection       TypeBoiteDirection?        @relation(fields: [CodeTyBtDir], references: [CodeTyBtDir], onDelete: NoAction, onUpdate: NoAction, map: "FK_Vehicule_TypeBoiteDirection")
+  TypeBoiteVitesse         TypeBoiteVitesse?          @relation(fields: [CodeTyBteVit], references: [CodeTyBteVit], onDelete: NoAction, onUpdate: NoAction, map: "FK_Vehicule_TypeBoiteVitesse")
+  TypeEmbrayage            TypeEmbrayage?             @relation(fields: [CodeTyEmbr], references: [CodeTyEmbr], onDelete: NoAction, onUpdate: NoAction, map: "FK_Vehicule_TypeEmbrayage")
+  TypeMoteur               TypeMoteur?                @relation(fields: [CodeTyMot], references: [CodeTyMot], onDelete: NoAction, onUpdate: NoAction, map: "FK_Vehicule_TypeMoteur")
+  TypePontArriere          TypePontArriere?           @relation(fields: [CodeTyPontArri], references: [CodeTyPontArri], onDelete: NoAction, onUpdate: NoAction, map: "FK_Vehicule_TypePontArriere")
+  TypeSuspontionArriere    TypeSuspontionArriere?     @relation(fields: [CodeTySusArr], references: [CodeTySusArr], onDelete: NoAction, onUpdate: NoAction, map: "FK_Vehicule_TypeSuspontionArriere")
+  TypeSuspontionAvant      TypeSuspontionAvant?       @relation(fields: [CodeTySusAv], references: [CodeTySusAv], onDelete: NoAction, onUpdate: NoAction, map: "FK_Vehicule_TypeSuspontionAvant")
+  TypeVehicule             TypeVehicule?              @relation(fields: [CodeTyVeh], references: [CodeTyVeh], onDelete: NoAction, onUpdate: NoAction, map: "FK_Vehicule_TypeVehicule")
+  TypeRemorque             TypeRemorque?              @relation(fields: [CodeTypeRemorque], references: [CodeTypeRemorque], onDelete: NoAction, onUpdate: NoAction, map: "FK_Vehicule_TypeRemorque")
+  HistoriqueAnomalieGazoil HistoriqueAnomalieGazoil[]
+  Jde                      Jde[]
+  OrdreReparation          OrdreReparation[]
+  TachygrapheVehiculRepar  TachygrapheVehiculRepar[]
+  VehFonc                  VehFonc[]
+  Vehi_Extin               Vehi_Extin[]
+  Vehicule_Remorque        Vehicule_Remorque[]
+  VehServ                  VehServ[]
+}
+
+model Vehicule_Chauffeur {
+  ImmatriculationVeh String    @db.VarChar(20)
+  MatriculeC         String    @db.VarChar(20)
+  DateDebutConduit   DateTime  @db.DateTime
+  CodeL              BigInt?
+  DateFinConduit     DateTime? @db.DateTime
+  IndexVehChaufDebut BigInt?
+  IndexVehChaufFin   BigInt?
+  Source             String?   @db.VarChar(50)
+  Code               BigInt    @id(map: "PK_Vehicule_Chauffeur_1") @default(autoincrement())
+}
+
+model Vehicule_Lieu {
+  CodeLieu          BigInt
+  NT                String    @db.VarChar(50)
+  NP                String?   @db.VarChar(50)
+  PE                String?   @db.VarChar(50)
+  DateDebut         DateTime  @db.SmallDateTime
+  DateFin           DateTime? @db.SmallDateTime
+  Code              BigInt    @id(map: "PK_Vehicule_Lieu") @default(autoincrement())
+  TypeAffectation   BigInt?
+  NTelegram         String?   @db.VarChar(50)
+  NRapport          String?   @db.VarChar(50)
+  Utilisateur       String?   @db.VarChar(50)
+  UtilisateurDesaff String?   @db.VarChar(50)
+}
+
+model Vehicule_Remorque {
+  ImmatriculationVeh String    @db.VarChar(20)
+  MatriculeRem       String    @db.VarChar(20)
+  DateDebutRemVeh    DateTime  @db.DateTime
+  DateFinRemVeh      DateTime? @db.DateTime
+  IndexVehRemDeb     BigInt?
+  IndexVehRemFin     BigInt?
+  IndexAffect        BigInt?
+  IndexDesaff        BigInt?
+  Code               BigInt    @id(map: "PK_Vehicule_Remorque") @default(autoincrement())
+  Vehicule           Vehicule  @relation(fields: [ImmatriculationVeh], references: [ImmatriculationVeh], onUpdate: NoAction, map: "FK_Vehicule_Remorque_Vehicule")
+  Remorque           Remorque  @relation(fields: [MatriculeRem], references: [MatriculeRem], onUpdate: NoAction, map: "FK_Vehicule_Remorque_Remorque1")
+}
+
+model VehRem {
+  CodeVehRem           BigInt                 @id(map: "PK_Organe") @default(autoincrement())
+  DesigVehRem          String?                @db.VarChar(50)
+  LigneOrdreReparation LigneOrdreReparation[]
+}
+
+model VehServ {
+  codeSV   BigInt    @id(map: "PK_VehServ")
+  CodeS    BigInt?
+  CodeV    String?   @db.VarChar(20)
+  DateD    DateTime? @db.DateTime
+  DateF    DateTime? @db.DateTime
+  Service  Service?  @relation(fields: [CodeS], references: [CodeService], onDelete: NoAction, onUpdate: NoAction, map: "FK_VehServ_Service")
+  Vehicule Vehicule? @relation(fields: [CodeV], references: [ImmatriculationVeh], onDelete: NoAction, onUpdate: NoAction, map: "FK_VehServ_Vehicule")
+}
+
+model VisitePr_ventifRemorque {
+  CodeVisite        BigInt  @id(map: "PK_VisitePréventifRemorque") @default(autoincrement())
+  DesigVisite       String  @db.VarChar(50)
+  CodeTypeRemorque  BigInt
+  Index_PrevV       BigInt?
+  EcheanceV         BigInt?
+  index_messageV    BigInt?
+  echeance_messageV BigInt?
+
+  @@index([CodeTypeRemorque], map: "index_CodeTypeRemorque")
+  @@map("VisitePréventifRemorque")
+}
+
+model VisitesPreventifs {
+  CodeVisite        BigInt        @id(map: "PK_VisitesPreventifs") @default(autoincrement())
+  DesigVisite       String        @db.VarChar(50)
+  CodeTyVehV        BigInt?
+  Index_PrevV       BigInt?
+  EcheanceV         BigInt?
+  index_messageV    BigInt?
+  echeance_messageV BigInt?
+  TypeVehicule      TypeVehicule? @relation(fields: [CodeTyVehV], references: [CodeTyVeh], onDelete: NoAction, onUpdate: NoAction, map: "FK_VisitesPreventifs_TypeVehicule")
+}
+
+model VisiteTechnique_ListeVehicule {
+  Vehicule String @db.VarChar(50)
+  NContrat Int
+
+  @@id([Vehicule, NContrat], map: "PK_VisiteTechnique_ListeVehicule")
+}
+
+model VisiteTechnique_Vehicule {
+  NContrat       Int       @id(map: "PK_VisiteTechnique_Vehiculewwww")
+  DateEffetDebut DateTime? @db.SmallDateTime
+  DateEffetFin   DateTime? @db.SmallDateTime
+  R_f_rence      BigInt?   @map("Référence")
+  Alerte         BigInt?
+  Glossaire      String?   @db.VarChar(8000)
+  Fractionnement String?   @db.VarChar(50)
+  Etat           Boolean?
+  Prolongation   BigInt?
+  Montant        Decimal?  @db.Decimal(18, 3)
+  Filiale        BigInt?
+  Departement    BigInt?
+}
+
+model VisiteVehiculeRemorque {
+  CodeVisite      BigInt
+  MatriculeVehRem String   @db.VarChar(20)
+  DateVist        DateTime @db.SmallDateTime
+  IndexVehRem     BigInt?
+
+  @@id([CodeVisite, MatriculeVehRem, DateVist], map: "PK_VisiteVehiculeRemorque")
+}
+
+model sysdiagrams {
+  name         String @db.NVarChar(128)
+  principal_id Int
+  diagram_id   Int    @id(map: "PK__sysdiagr__C2B05B6128D452E7") @default(autoincrement())
+  version      Int?
+  definition   Bytes?
+
+  @@unique([principal_id, name], map: "UK_principal_name")
+}
+
+model Amende {
+  ID        Int      @id(map: "PK__Amende__3214EC27EA76783E") @default(autoincrement())
+  Chauffeur String   @db.VarChar(50)
+  Vehicule  String   @db.VarChar(50)
+  Cause     String   @db.VarChar(50)
+  Date      DateTime @db.DateTime
+  Montant   Int
+  Etat      Boolean
+}
+
+model CK_Type {
+  CodeCK_Type  Int            @id(map: "PK__CK_Type__205F8179FC4905AE") @default(autoincrement())
+  Designation  String         @db.VarChar(50)
+  CK_Checklist CK_Checklist[]
+}
+
+model CK_SousType {
+  CodeCK_SousType Int            @id(map: "PK__CK_SousT__2D9DFE248F7338D5") @default(autoincrement())
+  Designation     String         @db.VarChar(50)
+  CK_Checklist    CK_Checklist[]
+}
+
+model CK_Contenu {
+  CodeCK_Contenu Int           @id(map: "PK__CK_Conte__303DBF7B357D7783") @default(autoincrement())
+  Designation    String        @db.VarChar(50)
+  CK_Checklist      CK_Checklist[]
+  }
+
+model CK_Checklist {
+  CodeCK          Int         
+  CodeCK_Type     Int
+  CodeCK_SousType Int
+  CodeCK_Contenu  Int
+  DesignationCK   String?        @db.VarChar(50)
+  CK_SousType     CK_SousType? @relation(fields: [CodeCK_SousType], references: [CodeCK_SousType], onDelete: NoAction, onUpdate: NoAction, map: "FK__CK_Checkl__CodeC__0C278248")
+  CK_Type         CK_Type?     @relation(fields: [CodeCK_Type], references: [CodeCK_Type], onDelete: NoAction, onUpdate: NoAction, map: "FK__CK_Checkl__CodeC__0B335E0F")
+  CK_Contenu      CK_Contenu? @relation(fields: [CodeCK_Contenu], references: [CodeCK_Contenu], onDelete: NoAction, onUpdate: NoAction, map: "FK__CK_Conten__CodeC__0F03EEF3")
+
+  @@id([CodeCK, CodeCK_Contenu], map: "PK_CK_Checklist")
+}
+
+model CK_Entete {
+  CodeDoc      Int      @id @default(autoincrement())
+  Filiale      Int     
+  Vehicule     String   @db.VarChar(50)
+  Chauffeur    String   @db.VarChar(50)
+  Remorque     String   @db.VarChar(50)
+  Date         DateTime @default(now()) @db.Date
+  Heure        DateTime @db.Time
+}
+
+model CK_Ligne {
+  CodeDoc      Int     @id @default(autoincrement()) 
+  Filiale      Int    
+  Oui          Boolean
+  Non          Boolean    
+  Observations String   @db.VarChar(200)
+} 

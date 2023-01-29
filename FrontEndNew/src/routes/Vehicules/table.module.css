@@ -1,0 +1,22 @@
+.icon {
+  padding: 0.2rem 0.5rem;
+  color: #fff;
+  font-weight: bold;
+  border-radius: 0.5rem;
+}
+
+.mission {
+  background-color: #ba78f7;
+}
+
+.panne {
+  background-color: #ff0000;
+}
+
+.bonne {
+  background-color: #008000;
+}
+
+.entretien {
+  background-color: #ffa500;
+}

@@ -1,0 +1,33 @@
+.stats__number {
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 1rem;
+  padding: 0.2rem 0.5rem;
+  width: 5rem;
+}
+
+.stats__number__color1 {
+  background-color: #52b69a;
+}
+
+.stats__number__color2 {
+  background-color: #ffb703;
+}
+
+.stats__number__color3 {
+  background-color: #023047;
+}
+
+.stats__number__color4 {
+  background-color: #e63946;
+}
+
+.stats__number__color5 {
+  background-color: #3a0ca3;
+}
+
+.card__footer {
+  background-color: rgba(207, 207, 207, 0.3);
+}

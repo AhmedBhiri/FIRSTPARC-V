@@ -1,0 +1,22 @@
+.icon {
+  padding: 0.2rem 0.5rem;
+  color: #fff;
+  font-weight: bold;
+  border-radius: 0.5rem;
+}
+
+.attente {
+  background-color: #ba78f7;
+}
+
+.annulée {
+  background-color: #ff0000;
+}
+
+.effectuée {
+  background-color: #008000;
+}
+
+.en_cours {
+  background-color: #ffa500;
+}
